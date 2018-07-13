@@ -1,8 +1,8 @@
 import { app, BrowserWindow } from "electron";
-import * as path from "path";
 import { format as formatUrl } from "url";
+import * as path from "path";
 
-const isDevelopment = process.env.NODE_ENV !== "production";
+import MenuBuilder from "../menu";
 
 // global reference to mainWindow (necessary to prevent window from being garbage collected)
 let mainWindow;
@@ -10,6 +10,7 @@ let mainWindow;
 function createMainWindow() {
   const window = new BrowserWindow({ width: 500, height: 700, frame: false });
 
+  const isDevelopment = process.env.NODE_ENV !== "production";
   if (isDevelopment) {
     window.webContents.openDevTools();
   }
@@ -58,4 +59,7 @@ app.on("activate", () => {
 // create main BrowserWindow when electron is ready
 app.on("ready", () => {
   mainWindow = createMainWindow();
+
+  const menuBuilder = new MenuBuilder(mainWindow);
+  menuBuilder.buildMenu();
 });
