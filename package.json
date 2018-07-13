@@ -1,0 +1,56 @@
+{
+  "name": "hypermark",
+  "version": "0.1.0",
+  "private": true,
+  "author": "Michal Czaplinski <mmczaplinski@gmail.com>",
+  "description": "A Hyper Markdown App",
+  "scripts": {
+    "dev": "electron-webpack dev",
+    "compile": "electron-webpack",
+    "compile:dll": "electron-webpack dll",
+    "dist": "yarn compile && electron-builder",
+    "dist:dir": "yarn dist --dir -c.compression=store -c.mac.identity=null"
+  },
+  "dependencies": {
+    "codemirror": "^5.39.0",
+    "css-loader": "^1.0.0",
+    "electron-is-dev": "^0.3.0",
+    "hypermd": "^0.3.9",
+    "mousetrap": "^1.6.2",
+    "react": "^16.4.1",
+    "react-dom": "^16.4.1",
+    "react-router": "^4.3.1",
+    "react-router-dom": "^4.3.1",
+    "source-map-support": "^0.5.5",
+    "ultramd": "^0.0.3"
+  },
+  "devDependencies": {
+    "@babel/preset-react": "^7.0.0-beta.53",
+    "babel-eslint": "8.2.3",
+    "electron": "2.0.0",
+    "electron-builder": "^20.19.2",
+    "electron-webpack": "^2.0.1",
+    "eslint": "4.19.1",
+    "eslint-config-airbnb": "16.1.0",
+    "eslint-config-czapla": "^1.1.0",
+    "eslint-config-prettier": "2.9.0",
+    "eslint-plugin-import": "2.12.0",
+    "eslint-plugin-jsx-a11y": "6.0.3",
+    "eslint-plugin-prettier": "2.6.1",
+    "eslint-plugin-react": "7.9.1",
+    "file-loader": "^1.1.11",
+    "prettier": "1.13.5",
+    "webpack": "^4.8.1"
+  },
+  "electronWebpack": {
+    "renderer": {
+      "webpackConfig": "webpack.renderer.config.js"
+    },
+    "main": {
+      "webpackConfig": "webpack.main.config.js"
+    }
+  },
+  "resolutions": {
+    "webpack-sources": "1.0.1"
+  }
+}
