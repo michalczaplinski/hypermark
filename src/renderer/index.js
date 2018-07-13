@@ -1,27 +1,14 @@
 import React from "react";
 import ReactDOM from "react-dom";
-import * as Mousetrap from "mousetrap";
-import * as path from "path";
+// import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
+import Main from "./Main";
+import Editor from "./Editor";
 
-import { format as formatUrl } from "url";
-
-import "./index.css";
-import App from "./App";
-
-const { BrowserWindow } = require("electron").remote;
-
-Mousetrap.bind("command+shift+k", () => {
-  const win = new BrowserWindow({
-    width: 800,
-    height: 600
-  });
-  win.loadURL(
-    formatUrl({
-      pathname: path.resolve(__dirname, "editor.html"),
-      protocol: "file",
-      slashes: true
-    })
-  );
-});
+const App = () => {
+  if (window.location.search.substring().slice(1) === "editor") {
+    return <Editor />;
+  }
+  return <Main />;
+};
 
 ReactDOM.render(<App />, document.body);
