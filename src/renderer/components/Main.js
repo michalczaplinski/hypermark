@@ -1,10 +1,8 @@
 import React from "react";
-import { format as formatUrl } from "url";
 import styled from "styled-components";
 import * as Mousetrap from "mousetrap";
-import * as path from "path";
 
-import "./../style/index.css";
+import "./../../style/index.css";
 
 const { BrowserWindow } = require("electron").remote;
 
@@ -35,7 +33,9 @@ class Main extends React.Component {
         );
       } else {
         win.loadURL(`file:///${__dirname}/index.html?editor`);
-        win.webContents.openDevTools();
+        if (process.env.DEBUG_PROD === "true") {
+          win.webContents.openDevTools();
+        }
       }
     });
   }

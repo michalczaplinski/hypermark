@@ -4,8 +4,8 @@ import ReactDOM from "react-dom";
 import "codemirror/lib/codemirror.css";
 import "codemirror/addon/fold/foldgutter.css";
 
-import "./hypermd/mode/hypermd.css";
-import "./hypermd/theme/hypermd-light.css";
+import "../hypermd/mode/hypermd.css";
+import "../hypermd/theme/hypermd-light.css";
 
 export default class Editor extends Component {
   componentDidMount() {

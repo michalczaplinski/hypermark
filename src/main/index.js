@@ -11,7 +11,7 @@ function createMainWindow() {
   const window = new BrowserWindow({ width: 500, height: 700, frame: false });
 
   const isDevelopment = process.env.NODE_ENV !== "production";
-  if (isDevelopment) {
+  if (isDevelopment || process.env.DEBUG_PROD === "true") {
     window.webContents.openDevTools();
   }
 

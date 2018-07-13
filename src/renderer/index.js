@@ -1,8 +1,8 @@
 import React from "react";
 import ReactDOM from "react-dom";
 // import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
-import Main from "./Main";
-import Editor from "./Editor";
+import Main from "./components/Main";
+import Editor from "./components/Editor";
 
 const App = () => {
   if (window.location.search.substring().slice(1) === "editor") {
@@ -11,4 +11,4 @@ const App = () => {
   return <Main />;
 };
 
-ReactDOM.render(<App />, document.body);
+ReactDOM.render(<App />, document.getElementById("app"));
