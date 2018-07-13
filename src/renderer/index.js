@@ -4,6 +4,8 @@ import ReactDOM from "react-dom";
 import Main from "./components/Main";
 import Editor from "./components/Editor";
 
+import "./../style/index.css";
+
 const App = () => {
   if (window.location.search.substring().slice(1) === "editor") {
     return <Editor />;

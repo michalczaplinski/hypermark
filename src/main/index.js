@@ -8,7 +8,7 @@ import MenuBuilder from "../menu";
 let mainWindow;
 
 function createMainWindow() {
-  const window = new BrowserWindow({ width: 500, height: 700, frame: false });
+  const window = new BrowserWindow({ width: 400, height: 500, frame: false });
 
   const isDevelopment = process.env.NODE_ENV !== "production";
   if (isDevelopment || process.env.DEBUG_PROD === "true") {

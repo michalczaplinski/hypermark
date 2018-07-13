@@ -22,6 +22,7 @@
     "ultramd": "^0.0.3"
   },
   "devDependencies": {
+    "@babel/plugin-proposal-class-properties": "^7.0.0-beta.53",
     "@babel/preset-react": "^7.0.0-beta.53",
     "babel-eslint": "8.2.3",
     "electron": "2.0.0",
