@@ -13,6 +13,8 @@ const fs = require("fs");
 const asyncReadFile = promisify(fs.readFile);
 const asyncReaddir = promisify(fs.readdir);
 
+const directoryPath = path.join(os.homedir(), "Documents");
+
 const Search = styled.input`
   width: 100%;
   height: 70px;
@@ -44,20 +46,18 @@ const File = styled.div`
   }
 `;
 
-const directoryPath = path.join(os.homedir(), "Documents");
-
 class Main extends React.Component {
   constructor(props) {
     super(props);
 
     this.state = {
-      allFiles: [],
-      currentFiles: []
+      allNotes: [],
+      currentNotes: []
     };
 
-    this.scanForFiles()
-      .then(files => {
-        this.setState({ allFiles: files, currentFiles: files });
+    this.scanForNotes()
+      .then(notes => {
+        this.setState({ allNotes: notes, currentNotes: notes });
       })
       .catch(e => console.error(e));
   }
@@ -84,7 +84,9 @@ class Main extends React.Component {
     });
   }
 
-  scanForFiles = async () => {
+  openFile = async () => {};
+
+  scanForNotes = async () => {
     // TODO: allow setting the directory
     const markdownFiles = [];
     try {
@@ -101,33 +103,33 @@ class Main extends React.Component {
   };
 
   search = async value => {
-    const { allFiles } = this.state;
+    const { allNotes } = this.state;
 
-    const newFiles = await asyncFilter(allFiles, async file => {
-      const hasValue = await this.hasValue(value.trim(), file);
+    const newNotes = await asyncFilter(allNotes, async note => {
+      const hasValue = await this.hasValue(value.trim(), note);
       return hasValue;
     });
 
-    this.setState({ currentFiles: newFiles });
+    this.setState({ currentNotes: newNotes });
   };
 
-  hasValue = async (searchValue, file) => {
+  hasValue = async (searchValue, note) => {
     try {
-      const fileContents = await asyncReadFile(
-        path.join(directoryPath, file),
+      const noteContents = await asyncReadFile(
+        path.join(directoryPath, note),
         "utf8"
       );
-      if (fileContents.indexOf(searchValue) !== -1) {
+      if (noteContents.indexOf(searchValue) !== -1) {
         return true;
       }
     } catch (error) {
-      console.error(`Unable to read file: ${file}`);
+      console.error(`Unable to read note: ${note}`);
     }
     return false;
   };
 
   render() {
-    const { currentFiles } = this.state;
+    const { currentNotes } = this.state;
 
     return (
       <div>
@@ -136,7 +138,7 @@ class Main extends React.Component {
           type="text"
           onChange={e => this.search(e.target.value)}
         />
-        <div>{currentFiles.map(file => <File key={file}> {file} </File>)}</div>
+        <div>{currentNotes.map(note => <File key={note}> {note} </File>)}</div>
       </div>
     );
   }
