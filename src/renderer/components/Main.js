@@ -144,7 +144,7 @@ class Main extends React.Component {
         path.join(directoryPath, note),
         "utf8"
       );
-      if (noteContents.indexOf(searchValue) !== -1) {
+      if (noteContents.concat(note).indexOf(searchValue) !== -1) {
         return true;
       }
     } catch (error) {
