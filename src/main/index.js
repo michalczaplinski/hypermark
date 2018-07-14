@@ -114,6 +114,5 @@ app.on("will-quit", () => {
 ipcMain.on("open-editor", (event, payload) => {
   editorWindow = createEditorWindow();
   editorWindow.focus();
-  const { noteContents } = payload;
-  editorWindow.noteContents = noteContents;
+  editorWindow.editorProps = payload;
 });

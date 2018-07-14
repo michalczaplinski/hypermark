@@ -13,8 +13,15 @@ const hyperMD = require("ultramd");
 export default class Editor extends Component {
   constructor(props) {
     super(props);
+
+    const {
+      noteContents,
+      noteFileName
+    } = remote.getCurrentWindow().editorProps;
+
     this.state = {
-      noteContents: remote.getCurrentWindow().noteContents
+      noteContents,
+      noteFileName
     };
   }
 

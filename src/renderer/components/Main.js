@@ -15,8 +15,16 @@ const asyncReaddir = promisify(fs.readdir);
 // SOME FLAGS
 const directoryPath = path.join(os.homedir(), "Documents");
 
-const Search = styled.input`
+const TopBarWrapper = styled.div`
+  display: flex;
+  flex-flow: row nowrap;
   width: 100%;
+  height: 70px;
+  margin-bottom: 5px;
+`;
+
+const Search = styled.input`
+  flex: 1;
   height: 70px;
   margin: 0px;
   padding: 5px;
@@ -28,6 +36,27 @@ const Search = styled.input`
   &:focus {
     outline-offset: 0px;
     outline: none;
+  }
+`;
+
+const AddNote = styled.button`
+  display: block;
+  height: 70px;
+  width: 70px;
+  border: none;
+  border-radius: 3px;
+  margin: 0;
+  padding: 5px;
+  background-color: lightgoldenrodyellow;
+  font-size: 35px;
+
+  &:hover {
+    cursor: pointer;
+    background-color: lightblue;
+  }
+  &:focus {
+    cursor: pointer;
+    background-color: lightblue;
   }
 `;
 
@@ -58,6 +87,7 @@ class Main extends React.Component {
     super(props);
 
     this.state = {
+      searchValue: "",
       allNotes: [],
       currentNotes: []
     };
@@ -76,9 +106,10 @@ class Main extends React.Component {
     }
   }
 
-  openNote = async location => {
+  openNote = async noteFileName => {
+    const location = path.join(directoryPath, noteFileName);
     const noteContents = await asyncReadFile(location, "utf8");
-    ipcRenderer.send("open-editor", { noteContents });
+    ipcRenderer.send("open-editor", { noteContents, noteFileName });
   };
 
   scanForNotes = async () => {
@@ -104,7 +135,7 @@ class Main extends React.Component {
       return hasValue;
     });
 
-    this.setState({ currentNotes: newNotes });
+    this.setState({ searchValue: value, currentNotes: newNotes });
   };
 
   hasValue = async (searchValue, note) => {
@@ -122,23 +153,55 @@ class Main extends React.Component {
     return false;
   };
 
+  createNewNote = () => {
+    const noteName = this.state.searchValue;
+
+    fs.writeFile(
+      path.join(directoryPath, `${noteName}.md`),
+      "",
+      { flag: "wx+" },
+      (err, fd) => {
+        if (err) {
+          if (err.code === "EEXIST") {
+            console.error("myfile already exists");
+            return;
+          }
+
+          throw err;
+        }
+
+        this.openNote(`${noteName}.md`);
+        this.scanForNotes().then(notes =>
+          this.setState({ currentNotes: notes })
+        );
+      }
+    );
+  };
+
   render() {
     const { currentNotes } = this.state;
 
     return (
       <div>
-        <Search
-          autoFocus
-          type="text"
-          innerRef={this.input}
-          onChange={e => this.search(e.target.value)}
-        />
+        <TopBarWrapper>
+          <Search
+            autoFocus
+            type="text"
+            innerRef={this.input}
+            onChange={e => this.search(e.target.value)}
+            onKeyDown={e => {
+              if (e.which === 13 && currentNotes.length > 0) {
+                this.openNote(currentNotes[0]);
+              } else if (e.which === 13 && currentNotes.length === 0) {
+                this.createNewNote();
+              }
+            }}
+          />
+          <AddNote onClick={() => this.createNewNote()}> + </AddNote>
+        </TopBarWrapper>
         <div>
           {currentNotes.map(note => (
-            <File
-              key={note}
-              onClick={() => this.openNote(path.join(directoryPath, note))}
-            >
+            <File key={note} onClick={() => this.openNote(note)}>
               {note}
             </File>
           ))}
