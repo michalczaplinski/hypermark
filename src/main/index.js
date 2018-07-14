@@ -1,4 +1,4 @@
-import { app, BrowserWindow } from "electron";
+import { app, BrowserWindow, ipcMain, globalShortcut } from "electron";
 import { format as formatUrl } from "url";
 import * as path from "path";
 
@@ -6,11 +6,13 @@ import MenuBuilder from "../menu";
 
 // global reference to mainWindow (necessary to prevent window from being garbage collected)
 let mainWindow;
+let editorWindow;
+
+const isDevelopment = process.env.NODE_ENV !== "production";
 
 function createMainWindow() {
   const window = new BrowserWindow({ width: 400, height: 500, frame: false });
 
-  const isDevelopment = process.env.NODE_ENV !== "production";
   if (isDevelopment || process.env.DEBUG_PROD === "true") {
     window.webContents.openDevTools();
   }
@@ -41,25 +43,77 @@ function createMainWindow() {
   return window;
 }
 
-// quit application when all windows are closed
+function createEditorWindow() {
+  const window = new BrowserWindow({
+    width: 420,
+    height: 520,
+    webPreferences: { webSecurity: false }
+  });
+
+  if (isDevelopment || process.env.DEBUG_PROD === "true") {
+    window.webContents.openDevTools();
+  }
+
+  if (isDevelopment) {
+    window.loadURL(
+      `http://localhost:${process.env.ELECTRON_WEBPACK_WDS_PORT}?editor`
+    );
+  } else {
+    window.loadURL(`file:///${__dirname}/index.html?editor`);
+  }
+
+  window.on("closed", () => {
+    editorWindow = null;
+  });
+
+  window.webContents.on("devtools-opened", () => {
+    window.focus();
+    setImmediate(() => {
+      window.focus();
+    });
+  });
+
+  return window;
+}
+
 app.on("window-all-closed", () => {
-  // on macOS it is common for applications to stay open until the user explicitly quits
   if (process.platform !== "darwin") {
     app.quit();
   }
 });
 
 app.on("activate", () => {
-  // on macOS it is common to re-create a window even after all windows have been closed
   if (mainWindow === null) {
     mainWindow = createMainWindow();
   }
 });
 
-// create main BrowserWindow when electron is ready
 app.on("ready", () => {
   mainWindow = createMainWindow();
-
   const menuBuilder = new MenuBuilder(mainWindow);
   menuBuilder.buildMenu();
+
+  const ret = globalShortcut.register("CommandOrControl+Shift+L", () => {
+    if (!mainWindow) {
+      mainWindow = createMainWindow();
+    } else {
+      mainWindow.focus();
+    }
+  });
+
+  if (!ret) {
+    console.log("registration failed");
+  }
+});
+
+app.on("will-quit", () => {
+  globalShortcut.unregister("CommandOrControl+Shift+L");
+  globalShortcut.unregisterAll();
+});
+
+ipcMain.on("open-editor", (event, payload) => {
+  editorWindow = createEditorWindow();
+  editorWindow.focus();
+  const { noteContents } = payload;
+  editorWindow.noteContents = noteContents;
 });

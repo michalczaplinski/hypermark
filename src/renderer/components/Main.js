@@ -1,10 +1,9 @@
 import React from "react";
 import styled from "styled-components";
-import * as Mousetrap from "mousetrap";
 
 import { asyncFilter } from "../../util";
+import { ipcRenderer } from "electron";
 
-const { BrowserWindow } = require("electron").remote;
 const { promisify } = require("util");
 const os = require("os");
 const path = require("path");
@@ -13,6 +12,7 @@ const fs = require("fs");
 const asyncReadFile = promisify(fs.readFile);
 const asyncReaddir = promisify(fs.readdir);
 
+// SOME FLAGS
 const directoryPath = path.join(os.homedir(), "Documents");
 
 const Search = styled.input`
@@ -31,16 +31,23 @@ const Search = styled.input`
   }
 `;
 
-const File = styled.div`
+const File = styled.button`
+  display: block;
   height: 70px;
   width: 100%;
   background-color: lightgreen;
   padding: 10px;
+  font-size: 17px;
   text-align: center;
-
+  border: none;
   transition: all 150ms ease;
 
   &:hover {
+    cursor: pointer;
+    background-color: lightblue;
+  }
+
+  &:focus {
     cursor: pointer;
     background-color: lightblue;
   }
@@ -54,6 +61,7 @@ class Main extends React.Component {
       allNotes: [],
       currentNotes: []
     };
+    this.input = React.createRef();
 
     this.scanForNotes()
       .then(notes => {
@@ -63,31 +71,17 @@ class Main extends React.Component {
   }
 
   componentDidMount() {
-    Mousetrap.bind("command+shift+k", () => {
-      const win = new BrowserWindow({
-        width: 800,
-        height: 600,
-        webPreferences: { webSecurity: false }
-      });
-
-      const isDevelopment = process.env.NODE_ENV !== "production";
-      if (isDevelopment) {
-        win.loadURL(
-          `http://localhost:${process.env.ELECTRON_WEBPACK_WDS_PORT}?editor`
-        );
-      } else {
-        win.loadURL(`file:///${__dirname}/index.html?editor`);
-        if (process.env.DEBUG_PROD === "true") {
-          win.webContents.openDevTools();
-        }
-      }
-    });
+    if (this.input.current) {
+      this.input.current.focus();
+    }
   }
 
-  openFile = async () => {};
+  openNote = async location => {
+    const noteContents = await asyncReadFile(location, "utf8");
+    ipcRenderer.send("open-editor", { noteContents });
+  };
 
   scanForNotes = async () => {
-    // TODO: allow setting the directory
     const markdownFiles = [];
     try {
       const files = await asyncReaddir(directoryPath);
@@ -136,9 +130,19 @@ class Main extends React.Component {
         <Search
           autoFocus
           type="text"
+          innerRef={this.input}
           onChange={e => this.search(e.target.value)}
         />
-        <div>{currentNotes.map(note => <File key={note}> {note} </File>)}</div>
+        <div>
+          {currentNotes.map(note => (
+            <File
+              key={note}
+              onClick={() => this.openNote(path.join(directoryPath, note))}
+            >
+              {note}
+            </File>
+          ))}
+        </div>
       </div>
     );
   }

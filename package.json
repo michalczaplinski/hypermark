@@ -14,6 +14,7 @@
   "dependencies": {
     "codemirror": "^5.39.0",
     "electron-is-dev": "^0.3.0",
+    "lodash.debounce": "^4.0.8",
     "mousetrap": "^1.6.2",
     "react": "^16.4.1",
     "react-dom": "^16.4.1",
