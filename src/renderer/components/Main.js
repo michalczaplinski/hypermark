@@ -1,21 +1,16 @@
 import React, { Component } from "react";
 import styled from "styled-components";
-
-import { asyncFilter } from "../../util";
+import { promisify } from "util";
+import path  from "path";
+import fs from "fs";
 import { ipcRenderer } from "electron";
 
-import { promisify } from "util";
-
-import * as os from "os";
-import * as path from "path";
-import * as fs from "fs";
+import { asyncFilter } from "../../util";
+import globalState from '../../globals'
 
 const asyncReadFile = promisify(fs.readFile);
 const asyncReaddir = promisify(fs.readdir);
 const asyncStat = promisify(fs.stat)
-
-// SOME FLAGS
-const directoryPath = path.join(os.homedir(), "Documents");
 
 const TopBarWrapper = styled.div`
   display: flex;
@@ -111,7 +106,7 @@ class Main extends Component {
   }
 
   openNote = async noteFileName => {
-    const location = path.join(directoryPath, noteFileName);
+    const location = path.join(globalState.directoryPath, noteFileName);
     const noteContents = await asyncReadFile(location, "utf8");
     const noteTitle = noteFileName.slice(0, -3);
     ipcRenderer.send("open-editor", { noteContents, noteFileName, noteTitle });
@@ -119,12 +114,12 @@ class Main extends Component {
 
   scanForNotes = async () =>  {
     try {
-      const files = await asyncReaddir(directoryPath);
+      const files = await asyncReaddir(globalState.directoryPath);
       const promiseOfFiles = files
-        .filter(file => path.extname(file) === '.md')
-        .map(file => {
-          return asyncStat(path.join(directoryPath, file))
-            .then(stats => ({ file, lastModified: stats.mtimeMs }))
+        .filter(noteFileName => path.extname(noteFileName) === '.md')
+        .map(noteFileName => {
+          return asyncStat(path.join(globalState.directoryPath, noteFileName))
+            .then(stats => ({ noteFileName, lastModified: stats.mtimeMs }))
             .catch(err => { throw err })
           })
         
@@ -136,28 +131,28 @@ class Main extends Component {
     }
   };
 
-  search = async value =>  {
+  search = async searchValue =>  {
     const { allNotes } = this.state;
 
-    const newNotes = await asyncFilter(allNotes, async note => {
-      const hasValue = await this.hasValue(value.trim(), note);
+    const newNotes = await asyncFilter(allNotes, async ({ noteFileName }) => {
+      const hasValue = await this.hasValue(searchValue.trim(), noteFileName);
       return hasValue;
     });
 
-    this.setState({ searchValue: value, currentSearchNotes: newNotes });
+    this.setState({ searchValue, currentSearchNotes: newNotes });
   };
 
-  hasValue = async (searchValue, note) => {
+  hasValue = async (searchValue, noteFileName) => {
     try {
       const noteContents = await asyncReadFile(
-        path.join(directoryPath, note),
+        path.join(globalState.directoryPath, noteFileName),
         "utf8"
       );
-      if (noteContents.concat(note).indexOf(searchValue) !== -1) {
+      if (noteContents.concat(noteFileName).indexOf(searchValue) !== -1) {
         return true;
       }
     } catch (error) {
-      console.error(`Unable to read note: ${note}`);
+      console.error(`Unable to read note: ${noteFileName}`);
     }
     return false;
   };
@@ -169,7 +164,7 @@ class Main extends Component {
     }
 
     fs.writeFile(
-      path.join(directoryPath, `${noteName}.md`),
+      path.join(globalState.directoryPath, `${noteName}.md`),
       "",
       { flag: "wx+" },
       err => {
@@ -213,9 +208,9 @@ class Main extends Component {
         </TopBarWrapper>
         <div>
           {currentSearchNotes.map(note => (
-            <File key={note.file} onClick={() => this.openNote(note.file)}>
+            <File key={note.noteFileName} onClick={() => this.openNote(note.noteFileName)}>
               {/* TODO: There is probably a smarter way to do this */}
-              {note.file.slice(0, -3)}
+              {note.noteFileName.slice(0, -3)}
             </File>
           ))}
         </div>

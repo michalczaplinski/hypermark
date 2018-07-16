@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import debounce from "lodash.debounce";
 import { remote } from "electron";
+import fs from "fs";
 
 import "codemirror/lib/codemirror.css";
 import "codemirror/addon/fold/foldgutter.css";
@@ -8,7 +9,7 @@ import "codemirror/addon/fold/foldgutter.css";
 import "../hypermd/mode/hypermd.css";
 import "../hypermd/theme/hypermd-light.css";
 
-const fs = require("fs");
+import globalState from "../../globals";
 
 const hyperMD = require("ultramd");
 
@@ -48,9 +49,7 @@ export default class Editor extends Component {
 
   saveNote = data => {
     const { noteFileName } = this.state;
-    const location = `${global.directoryPath}/${noteFileName}`;
-    console.log(location);
-    console.log(data);
+    const location = `${globalState.directoryPath}/${noteFileName}`;
     fs.writeFile(location, data, err => {
       if (err) {
         throw err;
