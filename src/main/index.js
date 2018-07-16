@@ -43,11 +43,12 @@ function createMainWindow() {
   return window;
 }
 
-function createEditorWindow() {
+function createEditorWindow(title) {
   const window = new BrowserWindow({
     width: 420,
     height: 520,
-    webPreferences: { webSecurity: false }
+    webPreferences: { webSecurity: false },
+    title
   });
 
   if (isDevelopment || process.env.DEBUG_PROD === "true") {
@@ -112,7 +113,7 @@ app.on("will-quit", () => {
 });
 
 ipcMain.on("open-editor", (event, payload) => {
-  editorWindow = createEditorWindow();
+  editorWindow = createEditorWindow(payload.noteTitle);
   editorWindow.focus();
   editorWindow.editorProps = payload;
 });

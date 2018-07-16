@@ -8,6 +8,8 @@ import "codemirror/addon/fold/foldgutter.css";
 import "../hypermd/mode/hypermd.css";
 import "../hypermd/theme/hypermd-light.css";
 
+const fs = require("fs");
+
 const hyperMD = require("ultramd");
 
 export default class Editor extends Component {
@@ -36,12 +38,25 @@ export default class Editor extends Component {
 
     editor.on("change", cm => {
       const newValue = cm.getDoc().getValue();
-
-      debounce(() => {
-        console.log(newValue);
-      }, 500)();
+      this.update(newValue);
     });
   }
+
+  update = debounce(newValue => {
+    this.saveNote(newValue);
+  }, 1000);
+
+  saveNote = data => {
+    const { noteFileName } = this.state;
+    const location = `${global.directoryPath}/${noteFileName}`;
+    console.log(location);
+    console.log(data);
+    fs.writeFile(location, data, err => {
+      if (err) {
+        throw err;
+      }
+    });
+  };
 
   render() {
     const { noteContents } = this.state;
