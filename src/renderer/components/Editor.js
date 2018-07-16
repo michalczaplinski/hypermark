@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import debounce from "lodash.debounce";
+import { debounce } from "lodash";
 import { remote } from "electron";
 import fs from "fs";
 
@@ -45,7 +45,7 @@ export default class Editor extends Component {
 
   update = debounce(newValue => {
     this.saveNote(newValue);
-  }, 1000);
+  }, 300);
 
   saveNote = data => {
     const { noteFileName } = this.state;
