@@ -8,7 +8,6 @@ import { promisify } from "util";
 import path from "path";
 import fs from "fs";
 
-import { asyncFilter } from "../../util";
 import globalState from "../../globals";
 
 const asyncReadFile = promisify(fs.readFile);
@@ -75,7 +74,6 @@ const File = styled.button`
 
   &:hover {
     cursor: pointer;
-    background-color: lightblue;
   }
 
   &:focus {
@@ -102,6 +100,19 @@ class Main extends Component {
   }
 
   componentDidMount() {
+    ipcRenderer.on("focus", () => {
+      this.input.current.focus();
+      this.scanForNotes()
+        .then(notes => {
+          this.setState({ allNotes: notes });
+          return this.search(this.state.searchValue, notes);
+        })
+        .then(notes => {
+          this.setState({ currentSearchNotes: notes });
+        })
+        .catch(e => console.error(e));
+    });
+
     if (this.input.current) {
       this.input.current.focus();
     }
@@ -134,15 +145,24 @@ class Main extends Component {
     }
   };
 
-  search = async searchValue => {
+  searchWrapper = async searchValue => {
     const { allNotes } = this.state;
+    const currentSearchNotes = await this.search(searchValue, allNotes);
+    this.setState({ searchValue, currentSearchNotes });
+  };
 
-    const newNotes = await asyncFilter(allNotes, async ({ noteFileName }) => {
-      const hasValue = await this.hasValue(searchValue.trim(), noteFileName);
-      return hasValue;
-    });
+  search = async (searchValue, allNotes) => {
+    const newNotesPromises = allNotes.map(
+      async ({ noteFileName, ...rest }) => ({
+        noteFileName,
+        ...(await this.hasValue(searchValue.trim(), noteFileName)),
+        ...rest
+      })
+    );
 
-    this.setState({ searchValue, currentSearchNotes: newNotes });
+    const newNotes = await Promise.all(newNotesPromises);
+    const currentSearchNotes = newNotes.filter(({ hasValue }) => hasValue);
+    return currentSearchNotes;
   };
 
   hasValue = async (searchValue, noteFileName) => {
@@ -151,13 +171,33 @@ class Main extends Component {
         path.join(globalState.directoryPath, noteFileName),
         "utf8"
       );
-      if (noteContents.concat(noteFileName).indexOf(searchValue) !== -1) {
-        return true;
+
+      const indexOfValue = noteContents.indexOf(searchValue);
+      const indexOfValueInTitle = noteFileName.indexOf(searchValue);
+
+      if (indexOfValueInTitle !== -1) {
+        return {
+          hasValue: true,
+          indexOfValueInTitle,
+          indexOfValue: null
+        };
+      }
+
+      if (indexOfValue !== -1) {
+        return {
+          hasValue: true,
+          indexOfValueInTitle: null,
+          indexOfValue
+        };
       }
     } catch (error) {
       console.error(`Unable to read note: ${noteFileName}`);
     }
-    return false;
+    return {
+      hasValue: false,
+      indexOfValueInTitle: null,
+      indexOfValue: null
+    };
   };
 
   createNewNote = () => {
@@ -181,10 +221,14 @@ class Main extends Component {
 
         this.openNote(`${noteName}.md`);
         this.scanForNotes()
-          .then(notes =>
-            this.setState({ allNotes: notes, currentSearchNotes: notes })
-          )
-          .catch(err => console.error(err));
+          .then(notes => {
+            this.setState({ allNotes: notes });
+            return this.search(this.state.searchValue, notes);
+          })
+          .then(notes => {
+            this.setState({ currentSearchNotes: notes });
+          })
+          .catch(e => console.error(e));
       }
     );
   };
@@ -192,7 +236,11 @@ class Main extends Component {
   render() {
     const { currentSearchNotes } = this.state;
 
-    const notes = orderBy(currentSearchNotes, ["lastModified"], ["desc"]);
+    const notes = orderBy(
+      currentSearchNotes,
+      ["indexOfValueInTitle", "indexOfValue", "lastModified"],
+      ["asc", "asc", "desc"]
+    );
 
     return (
       <div>
@@ -201,10 +249,10 @@ class Main extends Component {
             autoFocus
             type="text"
             innerRef={this.input}
-            onChange={e => this.search(e.target.value)}
+            onChange={e => this.searchWrapper(e.target.value)}
             onKeyDown={e => {
               if (e.which === 13 && notes.length > 0) {
-                this.openNote(notes[0].file);
+                this.openNote(notes[0].noteFileName);
               } else if (e.which === 13 && notes.length === 0) {
                 this.createNewNote();
               }
@@ -219,12 +267,14 @@ class Main extends Component {
               onClick={() => this.openNote(note.noteFileName)}
             >
               {/* TODO: There is probably a smarter way to do this */}
-              {note.noteFileName.slice(0, -3)}
+              {note.noteFileName.slice(0, -3)}{" "}
               <span>
                 {moment(note.lastModified).isAfter(moment().subtract(1, "days"))
                   ? moment(note.lastModified).fromNow()
-                  : moment(note.lastModified).format("MMMM Do YYYY, h:mm")}
-              </span>
+                  : moment(note.lastModified).format("MMMM Do YYYY, h:mma")}
+              </span>{" "}
+              title: {note.indexOfValueInTitle}
+              content: {note.indexOfValue}
             </File>
           ))}
         </div>

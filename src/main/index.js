@@ -1,4 +1,11 @@
-import { app, BrowserWindow, ipcMain, globalShortcut } from "electron";
+import {
+  app,
+  BrowserWindow,
+  ipcMain,
+  globalShortcut,
+  Menu,
+  MenuItem
+} from "electron";
 import { format as formatUrl } from "url";
 import * as path from "path";
 
@@ -31,6 +38,10 @@ function createMainWindow() {
 
   window.on("closed", () => {
     mainWindow = null;
+  });
+
+  window.on("focus", () => {
+    window.webContents.send("focus", true);
   });
 
   window.webContents.on("devtools-opened", () => {
@@ -114,6 +125,10 @@ app.on("will-quit", () => {
 
 ipcMain.on("open-editor", (event, payload) => {
   editorWindow = createEditorWindow(payload.noteTitle);
+
+  // const menuBuilder = new MenuBuilder(editorWindow, mainWindow);
+  // menuBuilder.buildMenu();
+
   editorWindow.focus();
   editorWindow.editorProps = payload;
 });
