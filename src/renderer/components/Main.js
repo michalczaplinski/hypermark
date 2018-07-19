@@ -60,7 +60,7 @@ const AddNote = styled.button`
   }
 `;
 
-const File = styled.button`
+const File = styled.div`
   display: block;
   height: 70px;
   width: 100%;
@@ -89,7 +89,8 @@ class Main extends Component {
     this.state = {
       allNotes: [],
       currentSearchNotes: [],
-      searchValue: ""
+      searchValue: "",
+      indexOfNoteBeingRenamed: undefined
     };
     this.input = React.createRef();
     this.mainWindow = remote.getCurrentWindow();
@@ -110,14 +111,6 @@ class Main extends Component {
       this.input.current.focus();
     }
   }
-
-  openNote = async noteFileName => {
-    const location = path.join(globalState.directoryPath, noteFileName);
-    const noteContents = await asyncReadFile(location, "utf8");
-    const noteTitle = noteFileName.slice(0, -3);
-    ipcRenderer.send("open-editor", { noteContents, noteFileName, noteTitle });
-    this.hideWindow();
-  };
 
   scanForNotes = async () => {
     const { searchValue } = this.state;
@@ -149,11 +142,6 @@ class Main extends Component {
     const currentSearchNotes = await this.search(searchValue, allNotes);
     this.setState({ currentSearchNotes });
   };
-
-  hideWindow() {
-    this.setState({ searchValue: "" });
-    this.mainWindow.hide();
-  }
 
   search = async (searchValue, allNotes) => {
     const newNotesPromises = allNotes.map(
@@ -232,8 +220,43 @@ class Main extends Component {
     );
   };
 
+  openNote = async noteFileName => {
+    const location = path.join(globalState.directoryPath, noteFileName);
+    const noteContents = await asyncReadFile(location, "utf8");
+    const noteTitle = noteFileName.slice(0, -3);
+    ipcRenderer.send("open-editor", { noteContents, noteFileName, noteTitle });
+    this.hideWindow();
+  };
+
+  renameNote = (oldName, newName) => {
+    const { directoryPath } = globalState;
+    try {
+      fs.accessSync(`${newName}.md`);
+      console.error(`File ${newName} already Exists!`);
+      return;
+    } catch (err) {
+      fs.rename(
+        `${directoryPath}/${oldName}`,
+        `${directoryPath}/${newName}.md`,
+        e => {
+          if (e) throw e;
+        }
+      );
+    }
+    this.scanForNotes();
+  };
+
+  hideWindow() {
+    this.setState({ searchValue: "" });
+    this.mainWindow.hide();
+  }
+
   render() {
-    const { currentSearchNotes, searchValue } = this.state;
+    const {
+      currentSearchNotes,
+      searchValue,
+      indexOfNoteBeingRenamed
+    } = this.state;
 
     const notes = orderBy(
       currentSearchNotes,
@@ -265,13 +288,37 @@ class Main extends Component {
           <AddNote onClick={() => this.createNewNote()}> + </AddNote>
         </TopBarWrapper>
         <div>
-          {notes.map(note => (
+          {notes.map((note, index) => (
             <File
               key={note.noteFileName}
-              onClick={() => this.openNote(note.noteFileName)}
+              onClick={() => {
+                if (index === indexOfNoteBeingRenamed) {
+                  return;
+                }
+                this.openNote(note.noteFileName);
+              }}
             >
-              {/* TODO: There is probably a smarter way to do this */}
-              {note.noteFileName.slice(0, -3)}{" "}
+              {index === indexOfNoteBeingRenamed ? (
+                <input
+                  ref={input => input && input.focus()}
+                  type="text"
+                  onFocus={e => e.target.select()}
+                  defaultValue={note.noteFileName.slice(0, -3)}
+                  onKeyDown={e => {
+                    if (e.key === "Enter") {
+                      e.target.blur();
+                      this.renameNote(note.noteFileName, e.target.value);
+                    } else if (e.key === "Escape") {
+                      e.target.blur();
+                    }
+                  }}
+                  onBlur={() =>
+                    this.setState({ indexOfNoteBeingRenamed: undefined })
+                  }
+                />
+              ) : (
+                note.noteFileName.slice(0, -3)
+              )}{" "}
               <span>
                 {moment(note.lastModified).isAfter(moment().subtract(1, "days"))
                   ? moment(note.lastModified).fromNow()
@@ -279,6 +326,14 @@ class Main extends Component {
               </span>{" "}
               title: {note.indexOfValueInTitle}
               content: {note.indexOfValue}
+              <button
+                onClick={e => {
+                  e.stopPropagation();
+                  this.setState({ indexOfNoteBeingRenamed: index });
+                }}
+              >
+                rename
+              </button>
             </File>
           ))}
         </div>
