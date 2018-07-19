@@ -124,18 +124,24 @@ app.on("activate", () => {
   if (mainWindow === null) {
     console.log("activate and window is null");
     mainWindow = createMainWindow();
+    const menuBuilder = new MainMenuBuilder(mainWindow);
+    menuBuilder.buildMenu();
   }
+  mainWindow.show();
+  mainWindow.focus();
 });
 
 app.on("ready", () => {
   console.log("app ready");
   mainWindow = createMainWindow();
-  const menuBuilder = new MainMenuBuilder(mainWindow);
+  let menuBuilder = new MainMenuBuilder(mainWindow);
   menuBuilder.buildMenu();
 
   const ret = globalShortcut.register("CommandOrControl+Shift+L", () => {
     if (!mainWindow) {
       mainWindow = createMainWindow();
+      menuBuilder = new MainMenuBuilder(mainWindow);
+      menuBuilder.buildMenu();
     } else if (mainWindow.isVisible() && !mainWindow.isFocused()) {
       mainWindow.focus();
     } else if (mainWindow.isVisible() && mainWindow.isFocused()) {

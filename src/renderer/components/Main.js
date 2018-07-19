@@ -87,18 +87,14 @@ class Main extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      allNotes: [], // [{ noteFileName, lastModified }]
+      allNotes: [],
       currentSearchNotes: [],
       searchValue: ""
     };
     this.input = React.createRef();
     this.mainWindow = remote.getCurrentWindow();
 
-    this.scanForNotes()
-      .then(notes => {
-        this.setState({ allNotes: notes, currentSearchNotes: notes });
-      })
-      .catch(e => console.error(e));
+    this.scanForNotes();
   }
 
   componentDidMount() {
@@ -107,15 +103,7 @@ class Main extends Component {
     });
     ipcRenderer.on("focus", () => {
       this.input.current.focus();
-      this.scanForNotes()
-        .then(notes => {
-          this.setState({ allNotes: notes });
-          return this.search(this.state.searchValue, notes);
-        })
-        .then(notes => {
-          this.setState({ currentSearchNotes: notes });
-        })
-        .catch(e => console.error(e));
+      this.scanForNotes();
     });
 
     if (this.input.current) {
@@ -128,9 +116,11 @@ class Main extends Component {
     const noteContents = await asyncReadFile(location, "utf8");
     const noteTitle = noteFileName.slice(0, -3);
     ipcRenderer.send("open-editor", { noteContents, noteFileName, noteTitle });
+    this.hideWindow();
   };
 
   scanForNotes = async () => {
+    const { searchValue } = this.state;
     try {
       const files = await asyncReaddir(globalState.directoryPath);
       const promiseOfFiles = files
@@ -143,10 +133,13 @@ class Main extends Component {
             })
         );
 
-      return Promise.all(promiseOfFiles);
+      const allNotes = await Promise.all(promiseOfFiles);
+      this.setState({ allNotes });
+      const currentSearchNotes = await this.search(searchValue, allNotes);
+      this.setState({ currentSearchNotes });
     } catch (err) {
       // TODO: fix error handling here
-      console.error(`Unable to scan directory: ${err}`);
+      console.error(`Error while scanning for notes: ${err}`);
     }
   };
 
@@ -156,6 +149,11 @@ class Main extends Component {
     const currentSearchNotes = await this.search(searchValue, allNotes);
     this.setState({ currentSearchNotes });
   };
+
+  hideWindow() {
+    this.setState({ searchValue: "" });
+    this.mainWindow.hide();
+  }
 
   search = async (searchValue, allNotes) => {
     const newNotesPromises = allNotes.map(
@@ -229,21 +227,13 @@ class Main extends Component {
         }
 
         this.openNote(`${noteName}.md`);
-        this.scanForNotes()
-          .then(notes => {
-            this.setState({ allNotes: notes });
-            return this.search(this.state.searchValue, notes);
-          })
-          .then(notes => {
-            this.setState({ currentSearchNotes: notes });
-          })
-          .catch(e => console.error(e));
+        this.scanForNotes();
       }
     );
   };
 
   render() {
-    const { currentSearchNotes } = this.state;
+    const { currentSearchNotes, searchValue } = this.state;
 
     const notes = orderBy(
       currentSearchNotes,
@@ -258,10 +248,12 @@ class Main extends Component {
             autoFocus
             type="text"
             innerRef={this.input}
+            value={searchValue}
             onChange={e => this.searchWrapper(e.target.value)}
             onKeyDown={e => {
               if (e.key === "Escape") {
-                this.mainWindow.hide();
+                e.preventDefault();
+                this.hideWindow();
               }
               if (e.key === "Enter" && notes.length > 0) {
                 this.openNote(notes[0].noteFileName);
