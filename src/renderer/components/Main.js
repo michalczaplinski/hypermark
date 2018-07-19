@@ -1,8 +1,9 @@
 import React, { Component } from "react";
 import styled from "styled-components";
-import { ipcRenderer } from "electron"; //eslint-disable-line
+import { ipcRenderer,  remote } from "electron"; //eslint-disable-line
 import { orderBy } from "lodash";
 import moment from "moment";
+import Mousetrap from "mousetrap";
 
 import { promisify } from "util";
 import path from "path";
@@ -91,6 +92,7 @@ class Main extends Component {
       searchValue: ""
     };
     this.input = React.createRef();
+    this.mainWindow = remote.getCurrentWindow();
 
     this.scanForNotes()
       .then(notes => {
@@ -100,6 +102,9 @@ class Main extends Component {
   }
 
   componentDidMount() {
+    Mousetrap.bind("esc", () => {
+      this.mainWindow.hide();
+    });
     ipcRenderer.on("focus", () => {
       this.input.current.focus();
       this.scanForNotes()
@@ -255,7 +260,10 @@ class Main extends Component {
             innerRef={this.input}
             onChange={e => this.searchWrapper(e.target.value)}
             onKeyDown={e => {
-              if (e.which === 13 && notes.length > 0) {
+              if (e.key === "Escape") {
+                this.mainWindow.hide();
+              }
+              if (e.key === "Enter" && notes.length > 0) {
                 this.openNote(notes[0].noteFileName);
               } else if (e.which === 13 && notes.length === 0) {
                 this.createNewNote();

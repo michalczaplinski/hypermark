@@ -4,7 +4,7 @@ import { format as formatUrl } from "url";
 import path from "path";
 
 import { validateObject } from "../util";
-import MenuBuilder from "../menu";
+import MainMenuBuilder from "../menu";
 
 const openEditors = {};
 
@@ -54,7 +54,6 @@ function createMainWindow() {
 
 function createEditorWindow(title) {
   let [x, y] = mainWindow.getPosition();
-  console.log(x, y);
   switch (lastWindowPosition) {
     case "leftTop":
       [x, y] = [x + 100, y - 100];
@@ -131,7 +130,7 @@ app.on("activate", () => {
 app.on("ready", () => {
   console.log("app ready");
   mainWindow = createMainWindow();
-  const menuBuilder = new MenuBuilder(mainWindow);
+  const menuBuilder = new MainMenuBuilder(mainWindow);
   menuBuilder.buildMenu();
 
   const ret = globalShortcut.register("CommandOrControl+Shift+L", () => {
