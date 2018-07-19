@@ -1,3 +1,6 @@
 module.exports = {
-  extends: ['czapla']
+  extends: ['czapla'],
+  rules: {
+    "no-console": 0
+  }
 }

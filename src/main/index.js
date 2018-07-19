@@ -34,7 +34,6 @@ function createMainWindow() {
   }
 
   window.on("closed", () => {
-    console.log("window closed");
     mainWindow = null;
   });
 
@@ -113,16 +112,13 @@ function createEditorWindow(title) {
 }
 
 app.on("window-all-closed", () => {
-  console.log("app window-all-closed");
   if (process.platform !== "darwin") {
     app.quit();
   }
 });
 
 app.on("activate", () => {
-  console.log("app activate");
   if (mainWindow === null) {
-    console.log("activate and window is null");
     mainWindow = createMainWindow();
     const menuBuilder = new MainMenuBuilder(mainWindow);
     menuBuilder.buildMenu();
@@ -132,7 +128,6 @@ app.on("activate", () => {
 });
 
 app.on("ready", () => {
-  console.log("app ready");
   mainWindow = createMainWindow();
   let menuBuilder = new MainMenuBuilder(mainWindow);
   menuBuilder.buildMenu();
@@ -153,12 +148,11 @@ app.on("ready", () => {
   });
 
   if (!ret) {
-    console.log("registration failed");
+    console.error("registration failed");
   }
 });
 
 app.on("will-quit", () => {
-  console.log("app will-quit");
   globalShortcut.unregister("CommandOrControl+Shift+L");
   globalShortcut.unregister("CommandOrControl+Shift+Z");
   globalShortcut.unregisterAll();
