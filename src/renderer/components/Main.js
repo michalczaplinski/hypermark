@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import styled from "styled-components";
-import { ipcRenderer } from "electron";
+import { ipcRenderer } from "electron"; //eslint-disable-line
 import { orderBy } from "lodash";
 import moment from "moment";
 
@@ -147,15 +147,19 @@ class Main extends Component {
 
   searchWrapper = async searchValue => {
     const { allNotes } = this.state;
+    this.setState({ searchValue });
     const currentSearchNotes = await this.search(searchValue, allNotes);
-    this.setState({ searchValue, currentSearchNotes });
+    this.setState({ currentSearchNotes });
   };
 
   search = async (searchValue, allNotes) => {
     const newNotesPromises = allNotes.map(
       async ({ noteFileName, ...rest }) => ({
         noteFileName,
-        ...(await this.hasValue(searchValue.trim(), noteFileName)),
+        ...(await this.hasValue(
+          searchValue.trim().toLowerCase(),
+          noteFileName
+        )),
         ...rest
       })
     );
@@ -171,9 +175,9 @@ class Main extends Component {
         path.join(globalState.directoryPath, noteFileName),
         "utf8"
       );
-
-      const indexOfValue = noteContents.indexOf(searchValue);
-      const indexOfValueInTitle = noteFileName.indexOf(searchValue);
+      const valueRegex = new RegExp(searchValue, "i");
+      const indexOfValue = noteContents.search(valueRegex);
+      const indexOfValueInTitle = noteFileName.search(valueRegex);
 
       if (indexOfValueInTitle !== -1) {
         return {

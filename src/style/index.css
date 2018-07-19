@@ -7,6 +7,14 @@ body {
     background-color: white;
 }
 
+#app {
+    height: 100%;
+}
+
+#app > .CodeMirror {
+    height: 100%;
+}
+
 button {
     -webkit-app-region: no-drag;
 }

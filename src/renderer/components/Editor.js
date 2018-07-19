@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import { debounce } from "lodash";
-import { remote } from "electron";
+import { remote } from "electron"; //eslint-disable-line
 import fs from "fs";
 
 import "codemirror/lib/codemirror.css";
@@ -21,7 +21,6 @@ export default class Editor extends Component {
       noteContents,
       noteFileName
     } = remote.getCurrentWindow().editorProps;
-
     this.state = {
       noteContents,
       noteFileName
@@ -59,6 +58,8 @@ export default class Editor extends Component {
 
   render() {
     const { noteContents } = this.state;
-    return <textarea value={noteContents} id="textarea" />;
+    return (
+      <textarea value={noteContents} id="textarea" style={{ height: "100%" }} />
+    );
   }
 }

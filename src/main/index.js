@@ -1,19 +1,16 @@
-import {
-  app,
-  BrowserWindow,
-  ipcMain,
-  globalShortcut,
-  Menu,
-  MenuItem
-} from "electron";
+import { app, BrowserWindow, ipcMain, globalShortcut } from "electron"; //eslint-disable-line
+import Joi from "joi";
 import { format as formatUrl } from "url";
-import * as path from "path";
+import path from "path";
 
+import { validateObject } from "../util";
 import MenuBuilder from "../menu";
 
-// global reference to mainWindow (necessary to prevent window from being garbage collected)
+const openEditors = {};
+
 let mainWindow;
 let editorWindow;
+let lastWindowPosition;
 
 const isDevelopment = process.env.NODE_ENV !== "production";
 
@@ -37,6 +34,7 @@ function createMainWindow() {
   }
 
   window.on("closed", () => {
+    console.log("window closed");
     mainWindow = null;
   });
 
@@ -55,9 +53,36 @@ function createMainWindow() {
 }
 
 function createEditorWindow(title) {
+  let [x, y] = mainWindow.getPosition();
+  console.log(x, y);
+  switch (lastWindowPosition) {
+    case "leftTop":
+      [x, y] = [x + 100, y - 100];
+      lastWindowPosition = "rightTop";
+      break;
+    case "rightTop":
+      [x, y] = [x + 100, y + 100];
+      lastWindowPosition = "rightBottom";
+      break;
+    case "rightBottom":
+      [x, y] = [x - 100, y + 100];
+      lastWindowPosition = "leftBottom";
+      break;
+    case "leftBottom":
+      [x, y] = [x - 100, y - 100];
+      lastWindowPosition = "leftTop";
+      break;
+    default:
+      [x, y] = [x + 100, y - 100];
+      lastWindowPosition = "rightTop";
+  }
+
   const window = new BrowserWindow({
+    x,
+    y,
     width: 420,
     height: 520,
+    minWidth: 200,
     webPreferences: { webSecurity: false },
     title
   });
@@ -75,7 +100,7 @@ function createEditorWindow(title) {
   }
 
   window.on("closed", () => {
-    editorWindow = null;
+    delete openEditors[title];
   });
 
   window.webContents.on("devtools-opened", () => {
@@ -89,18 +114,22 @@ function createEditorWindow(title) {
 }
 
 app.on("window-all-closed", () => {
+  console.log("app window-all-closed");
   if (process.platform !== "darwin") {
     app.quit();
   }
 });
 
 app.on("activate", () => {
+  console.log("app activate");
   if (mainWindow === null) {
+    console.log("activate and window is null");
     mainWindow = createMainWindow();
   }
 });
 
 app.on("ready", () => {
+  console.log("app ready");
   mainWindow = createMainWindow();
   const menuBuilder = new MenuBuilder(mainWindow);
   menuBuilder.buildMenu();
@@ -108,7 +137,12 @@ app.on("ready", () => {
   const ret = globalShortcut.register("CommandOrControl+Shift+L", () => {
     if (!mainWindow) {
       mainWindow = createMainWindow();
+    } else if (mainWindow.isVisible() && !mainWindow.isFocused()) {
+      mainWindow.focus();
+    } else if (mainWindow.isVisible() && mainWindow.isFocused()) {
+      mainWindow.hide();
     } else {
+      mainWindow.show();
       mainWindow.focus();
     }
   });
@@ -119,16 +153,30 @@ app.on("ready", () => {
 });
 
 app.on("will-quit", () => {
+  console.log("app will-quit");
   globalShortcut.unregister("CommandOrControl+Shift+L");
+  globalShortcut.unregister("CommandOrControl+Shift+Z");
   globalShortcut.unregisterAll();
 });
 
-ipcMain.on("open-editor", (event, payload) => {
-  editorWindow = createEditorWindow(payload.noteTitle);
+ipcMain.on("open-editor", (_, payload) => {
+  validateObject(payload, {
+    noteContents: Joi.string().allow(""),
+    noteFileName: Joi.string().trim(),
+    noteTitle: Joi.string()
+      .trim()
+      .min(1)
+  });
 
-  // const menuBuilder = new MenuBuilder(editorWindow, mainWindow);
-  // menuBuilder.buildMenu();
-
-  editorWindow.focus();
+  const { noteTitle } = payload;
+  if (openEditors[noteTitle]) {
+    openEditors[noteTitle].editorWindow.focus();
+  } else {
+    editorWindow = createEditorWindow(noteTitle);
+    openEditors[noteTitle] = {
+      editorWindow,
+      ...payload
+    };
+  }
   editorWindow.editorProps = payload;
 });
