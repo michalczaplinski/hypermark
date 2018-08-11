@@ -24,12 +24,16 @@ class UndoStack {
   }
 
   push(note) {
-    // setTimeout(() => this.stack.pop(), this.timeout);
     return this.stack.push(note);
   }
 
-  pop() {
-    return this.stack.pop();
+  undo() {
+    const undoFunc = this.stack.pop();
+    try {
+      undoFunc();
+    } catch (e) {
+      console.warn("nothing left on the stack");
+    }
   }
 }
 
@@ -121,6 +125,9 @@ class Main extends Component {
   componentDidMount() {
     Mousetrap.bind("esc", () => {
       this.mainWindow.hide();
+    });
+    Mousetrap.bind(["command+z", "ctrl+z"], () => {
+      undoStack.undo();
     });
     ipcRenderer.on("focus", () => {
       this.input.current.focus();
@@ -219,22 +226,6 @@ class Main extends Component {
     };
   };
 
-  deleteNote = async noteName => {
-    const noteFileName = `${noteName}.md`;
-    const location = path.join(globalState.directoryPath, noteFileName);
-    const noteContents = await asyncReadFile(location, "utf8");
-
-    undoStack.push(() => this.createNewNote(noteName, noteContents));
-
-    asyncRmFile(location)
-      .then(() => {
-        this.scanForNotes();
-      })
-      .catch(err => {
-        console.warn(err);
-      });
-  };
-
   createNewNote = (noteName, noteContents) => {
     if (noteName === "") {
       return;
@@ -261,6 +252,22 @@ class Main extends Component {
           }
           throw err;
         }
+      });
+  };
+
+  deleteNote = async noteName => {
+    const noteFileName = `${noteName}.md`;
+    const location = path.join(globalState.directoryPath, noteFileName);
+    const noteContents = await asyncReadFile(location, "utf8");
+
+    undoStack.push(() => this.createNewNote(noteName, noteContents));
+
+    asyncRmFile(location)
+      .then(() => {
+        this.scanForNotes();
+      })
+      .catch(err => {
+        console.warn(err);
       });
   };
 
@@ -317,14 +324,7 @@ class Main extends Component {
         <TopBarWrapper>
           <button
             onClick={e => {
-              console.log(undoStack);
               e.preventDefault();
-              const undoFunc = undoStack.pop();
-              try {
-                undoFunc();
-              } catch (e) {
-                console.warn("nothing left on the stack");
-              }
             }}
           >
             UNDO
