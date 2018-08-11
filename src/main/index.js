@@ -6,11 +6,11 @@ import path from "path";
 import { validateObject } from "../util";
 import MainMenuBuilder from "../menu";
 
-const openEditors = {};
-
-let mainWindow;
-let editorWindow;
-let lastWindowPosition;
+const state = {
+  mainWindow: undefined,
+  lastWindowPosition: undefined,
+  openEditors: {}
+};
 
 const isDevelopment = process.env.NODE_ENV !== "production";
 
@@ -34,7 +34,7 @@ function createMainWindow() {
   }
 
   window.on("closed", () => {
-    mainWindow = null;
+    state.mainWindow = null;
   });
 
   window.on("focus", () => {
@@ -52,27 +52,27 @@ function createMainWindow() {
 }
 
 function createEditorWindow(title) {
-  let [x, y] = mainWindow.getPosition();
-  switch (lastWindowPosition) {
+  let [x, y] = state.mainWindow.getPosition();
+  switch (state.lastWindowPosition) {
     case "leftTop":
       [x, y] = [x + 100, y - 100];
-      lastWindowPosition = "rightTop";
+      state.lastWindowPosition = "rightTop";
       break;
     case "rightTop":
       [x, y] = [x + 100, y + 100];
-      lastWindowPosition = "rightBottom";
+      state.lastWindowPosition = "rightBottom";
       break;
     case "rightBottom":
       [x, y] = [x - 100, y + 100];
-      lastWindowPosition = "leftBottom";
+      state.lastWindowPosition = "leftBottom";
       break;
     case "leftBottom":
       [x, y] = [x - 100, y - 100];
-      lastWindowPosition = "leftTop";
+      state.lastWindowPosition = "leftTop";
       break;
     default:
       [x, y] = [x + 100, y - 100];
-      lastWindowPosition = "rightTop";
+      state.lastWindowPosition = "rightTop";
   }
 
   const window = new BrowserWindow({
@@ -98,7 +98,7 @@ function createEditorWindow(title) {
   }
 
   window.on("closed", () => {
-    delete openEditors[title];
+    delete state.openEditors[title];
   });
 
   window.webContents.on("devtools-opened", () => {
@@ -118,32 +118,32 @@ app.on("window-all-closed", () => {
 });
 
 app.on("activate", () => {
-  if (mainWindow === null) {
-    mainWindow = createMainWindow();
-    const menuBuilder = new MainMenuBuilder(mainWindow);
+  if (state.mainWindow === null) {
+    state.mainWindow = createMainWindow();
+    const menuBuilder = new MainMenuBuilder(state.mainWindow);
     menuBuilder.buildMenu();
   }
-  mainWindow.show();
-  mainWindow.focus();
+  state.mainWindow.show();
+  state.mainWindow.focus();
 });
 
 app.on("ready", () => {
-  mainWindow = createMainWindow();
-  let menuBuilder = new MainMenuBuilder(mainWindow);
+  state.mainWindow = createMainWindow();
+  let menuBuilder = new MainMenuBuilder(state.mainWindow);
   menuBuilder.buildMenu();
 
   const ret = globalShortcut.register("CommandOrControl+Shift+L", () => {
-    if (!mainWindow) {
-      mainWindow = createMainWindow();
-      menuBuilder = new MainMenuBuilder(mainWindow);
+    if (!state.mainWindow) {
+      state.mainWindow = createMainWindow();
+      menuBuilder = new MainMenuBuilder(state.mainWindow);
       menuBuilder.buildMenu();
-    } else if (mainWindow.isVisible() && !mainWindow.isFocused()) {
-      mainWindow.focus();
-    } else if (mainWindow.isVisible() && mainWindow.isFocused()) {
-      mainWindow.hide();
+    } else if (state.mainWindow.isVisible() && !state.mainWindow.isFocused()) {
+      state.mainWindow.focus();
+    } else if (state.mainWindow.isVisible() && state.mainWindow.isFocused()) {
+      state.mainWindow.hide();
     } else {
-      mainWindow.show();
-      mainWindow.focus();
+      state.mainWindow.show();
+      state.mainWindow.focus();
     }
   });
 
@@ -168,14 +168,14 @@ ipcMain.on("open-editor", (_, payload) => {
   });
 
   const { noteTitle } = payload;
-  if (openEditors[noteTitle]) {
-    openEditors[noteTitle].editorWindow.focus();
+  if (state.openEditors[noteTitle]) {
+    state.openEditors[noteTitle].editorWindow.focus();
   } else {
-    editorWindow = createEditorWindow(noteTitle);
-    openEditors[noteTitle] = {
+    const editorWindow = createEditorWindow(noteTitle);
+    editorWindow.editorProps = payload;
+    state.openEditors[noteTitle] = {
       editorWindow,
       ...payload
     };
   }
-  editorWindow.editorProps = payload;
 });
