@@ -14,6 +14,26 @@ import globalState from "../../globals";
 const asyncReadFile = promisify(fs.readFile);
 const asyncReaddir = promisify(fs.readdir);
 const asyncStat = promisify(fs.stat);
+const asyncRmFile = promisify(fs.unlink);
+const asyncWriteFile = promisify(fs.writeFile);
+
+class UndoStack {
+  constructor(timeout) {
+    this.stack = [];
+    this.timeout = timeout;
+  }
+
+  push(note) {
+    // setTimeout(() => this.stack.pop(), this.timeout);
+    return this.stack.push(note);
+  }
+
+  pop() {
+    return this.stack.pop();
+  }
+}
+
+const undoStack = new UndoStack();
 
 const TopBarWrapper = styled.div`
   display: flex;
@@ -120,7 +140,11 @@ class Main extends Component {
         .filter(noteFileName => path.extname(noteFileName) === ".md")
         .map(noteFileName =>
           asyncStat(path.join(globalState.directoryPath, noteFileName))
-            .then(stats => ({ noteFileName, lastModified: stats.mtimeMs }))
+            .then(stats => ({
+              noteName: noteFileName.replace(/\.md$/, ""),
+              noteFileName,
+              lastModified: stats.mtimeMs
+            }))
             .catch(err => {
               throw err;
             })
@@ -195,17 +219,41 @@ class Main extends Component {
     };
   };
 
-  createNewNote = () => {
-    const noteName = this.state.searchValue;
+  deleteNote = async noteName => {
+    const noteFileName = `${noteName}.md`;
+    const location = path.join(globalState.directoryPath, noteFileName);
+    const noteContents = await asyncReadFile(location, "utf8");
+
+    undoStack.push(() => this.createNewNote(noteName, noteContents));
+
+    asyncRmFile(location)
+      .then(() => {
+        this.scanForNotes();
+      })
+      .catch(err => {
+        console.warn(err);
+      });
+  };
+
+  createNewNote = (noteName, noteContents) => {
     if (noteName === "") {
       return;
     }
 
-    fs.writeFile(
+    let contents = "";
+    if (typeof noteContents === "string") {
+      contents = noteContents;
+    }
+
+    return asyncWriteFile(
       path.join(globalState.directoryPath, `${noteName}.md`),
-      "",
-      { flag: "wx+" },
-      err => {
+      contents,
+      { flag: "wx+" }
+    )
+      .then(() => {
+        this.scanForNotes();
+      })
+      .catch(err => {
         if (err) {
           if (err.code === "EEXIST") {
             console.error(`"${noteName}" already exists`);
@@ -213,18 +261,18 @@ class Main extends Component {
           }
           throw err;
         }
-
-        this.openNote(`${noteName}.md`);
-        this.scanForNotes();
-      }
-    );
+      });
   };
 
-  openNote = async noteFileName => {
+  openNote = async noteName => {
+    const noteFileName = `${noteName}.md`;
     const location = path.join(globalState.directoryPath, noteFileName);
     const noteContents = await asyncReadFile(location, "utf8");
-    const noteTitle = noteFileName.slice(0, -3);
-    ipcRenderer.send("open-editor", { noteContents, noteFileName, noteTitle });
+    ipcRenderer.send("open-editor", {
+      noteContents,
+      noteFileName,
+      noteTitle: noteName
+    });
     this.hideWindow();
   };
 
@@ -236,7 +284,7 @@ class Main extends Component {
       return;
     } catch (err) {
       fs.rename(
-        `${directoryPath}/${oldName}`,
+        `${directoryPath}/${oldName}.md`,
         `${directoryPath}/${newName}.md`,
         e => {
           if (e) throw e;
@@ -267,6 +315,20 @@ class Main extends Component {
     return (
       <div>
         <TopBarWrapper>
+          <button
+            onClick={e => {
+              console.log(undoStack);
+              e.preventDefault();
+              const undoFunc = undoStack.pop();
+              try {
+                undoFunc();
+              } catch (e) {
+                console.warn("nothing left on the stack");
+              }
+            }}
+          >
+            UNDO
+          </button>
           <Search
             autoFocus
             type="text"
@@ -279,23 +341,33 @@ class Main extends Component {
                 this.hideWindow();
               }
               if (e.key === "Enter" && notes.length > 0) {
-                this.openNote(notes[0].noteFileName);
+                this.openNote(notes[0].noteName);
               } else if (e.which === 13 && notes.length === 0) {
-                this.createNewNote();
+                this.createNewNote(searchValue, "").then(() =>
+                  this.openNote(searchValue)
+                );
               }
             }}
           />
-          <AddNote onClick={() => this.createNewNote()}> + </AddNote>
+          <AddNote
+            onClick={() =>
+              this.createNewNote(searchValue, "").then(() =>
+                this.openNote(searchValue)
+              )
+            }
+          >
+            +
+          </AddNote>
         </TopBarWrapper>
         <div>
           {notes.map((note, index) => (
             <File
-              key={note.noteFileName}
+              key={note.noteName}
               onClick={() => {
                 if (index === indexOfNoteBeingRenamed) {
                   return;
                 }
-                this.openNote(note.noteFileName);
+                this.openNote(note.noteName);
               }}
             >
               {index === indexOfNoteBeingRenamed ? (
@@ -303,11 +375,11 @@ class Main extends Component {
                   ref={input => input && input.focus()}
                   type="text"
                   onFocus={e => e.target.select()}
-                  defaultValue={note.noteFileName.slice(0, -3)}
+                  defaultValue={note.noteName}
                   onKeyDown={e => {
                     if (e.key === "Enter") {
                       e.target.blur();
-                      this.renameNote(note.noteFileName, e.target.value);
+                      this.renameNote(note.noteName, e.target.value);
                     } else if (e.key === "Escape") {
                       e.target.blur();
                     }
@@ -317,7 +389,7 @@ class Main extends Component {
                   }
                 />
               ) : (
-                note.noteFileName.slice(0, -3)
+                note.noteName
               )}
               <span>
                 {moment(note.lastModified).isAfter(moment().subtract(1, "days"))
@@ -333,6 +405,14 @@ class Main extends Component {
                 }}
               >
                 rename
+              </button>
+              <button
+                onClick={e => {
+                  e.stopPropagation();
+                  this.deleteNote(note.noteName);
+                }}
+              >
+                delete
               </button>
             </File>
           ))}
