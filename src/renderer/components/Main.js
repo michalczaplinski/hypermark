@@ -16,6 +16,7 @@ const asyncReaddir = promisify(fs.readdir);
 const asyncStat = promisify(fs.stat);
 const asyncRmFile = promisify(fs.unlink);
 const asyncWriteFile = promisify(fs.writeFile);
+const asyncRename = promisify(fs.rename);
 
 class UndoStack {
   constructor(timeout) {
@@ -290,15 +291,22 @@ class Main extends Component {
       console.error(`File ${newName} already Exists!`);
       return;
     } catch (err) {
-      fs.rename(
+      asyncRename(
         `${directoryPath}/${oldName}.md`,
-        `${directoryPath}/${newName}.md`,
-        e => {
-          if (e) throw e;
-        }
-      );
+        `${directoryPath}/${newName}.md`
+      )
+        .then(() => {
+          undoStack.push(() => this.renameNote(newName, oldName));
+          ipcRenderer.send("update-editor-title", {
+            title: oldName,
+            newTitle: newName
+          });
+          this.scanForNotes();
+        })
+        .catch(e => {
+          console.warn(e);
+        });
     }
-    this.scanForNotes();
   };
 
   hideWindow() {

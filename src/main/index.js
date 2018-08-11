@@ -179,3 +179,11 @@ ipcMain.on("open-editor", (_, payload) => {
     };
   }
 });
+
+ipcMain.on("update-editor-title", (_, { title, newTitle }) => {
+  // TODO: I think we need stronger guarantees here that the state is consistent
+  state.openEditors[newTitle] = state.openEditors[title];
+  state.openEditors[newTitle].noteTitle = newTitle;
+  state.openEditors[newTitle].editorWindow.setTitle(newTitle);
+  delete state.openEditors[title];
+});
