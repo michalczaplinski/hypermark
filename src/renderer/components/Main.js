@@ -318,12 +318,12 @@ class Main extends Component {
                 />
               ) : (
                 note.noteFileName.slice(0, -3)
-              )}{" "}
+              )}
               <span>
                 {moment(note.lastModified).isAfter(moment().subtract(1, "days"))
                   ? moment(note.lastModified).fromNow()
                   : moment(note.lastModified).format("MMMM Do YYYY, h:mma")}
-              </span>{" "}
+              </span>
               title: {note.indexOfValueInTitle}
               content: {note.indexOfValue}
               <button
