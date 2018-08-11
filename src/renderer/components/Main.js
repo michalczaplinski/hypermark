@@ -265,6 +265,7 @@ class Main extends Component {
 
     asyncRmFile(location)
       .then(() => {
+        ipcRenderer.send("delete-editor", { title: noteName });
         this.scanForNotes();
       })
       .catch(err => {
@@ -332,6 +333,7 @@ class Main extends Component {
         <TopBarWrapper>
           <button
             onClick={e => {
+              undoStack.undo();
               e.preventDefault();
             }}
           >
