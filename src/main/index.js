@@ -21,6 +21,7 @@ function createMainWindow() {
   const window = new BrowserWindow({
     width: 400,
     height: SEARCHBAR_HEIGHT + ITEM_HEIGHT * 6,
+    maxHeight: SEARCHBAR_HEIGHT + ITEM_HEIGHT * 6,
     frame: false,
     fullscreenable: false,
     disableAutoHideCursor: true
