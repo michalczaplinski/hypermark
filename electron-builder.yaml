@@ -25,7 +25,7 @@ dmg:
 
 mac:
   target: dmg
-  category: public.productivity.tools
+  category: public.app-category.productivity
 
 win:
   target: nsis
