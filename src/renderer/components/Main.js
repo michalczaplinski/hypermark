@@ -130,6 +130,9 @@ class Main extends Component {
     Mousetrap.bind(["command+z", "ctrl+z"], () => {
       undoStack.undo();
     });
+    Mousetrap.bind("command+l", () => {
+      this.input.current.focus();
+    });
     ipcRenderer.on("focus", () => {
       this.input.current.focus();
       this.scanForNotes();
@@ -300,7 +303,8 @@ class Main extends Component {
           undoStack.push(() => this.renameNote(newName, oldName));
           ipcRenderer.send("update-editor-title", {
             title: oldName,
-            newTitle: newName
+            newTitle: newName,
+            newFileName: `${newName}.md`
           });
           this.scanForNotes();
         })

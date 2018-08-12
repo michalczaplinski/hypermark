@@ -9,7 +9,7 @@ import MainMenuBuilder from "../menu";
 const state = {
   mainWindow: undefined,
   lastWindowPosition: undefined,
-  openEditors: {}
+  openEditors: []
 };
 
 const isDevelopment = process.env.NODE_ENV !== "production";
@@ -97,9 +97,15 @@ function createEditorWindow(title) {
     window.loadURL(`file:///${__dirname}/index.html?editor`);
   }
 
-  window.on("closed", () => {
-    if (state.openEditors[title]) {
-      delete state.openEditors[title];
+  window.on("close", event => {
+    const editor = state.openEditors.find(
+      e => e.noteTitle === event.sender.editorProps.noteTitle
+    );
+    if (editor) {
+      editor.editorWindow = null;
+      state.openEditors = state.openEditors.filter(
+        e => e.noteTitle !== event.sender.editorProps.noteTitle
+      );
     }
   });
 
@@ -170,31 +176,39 @@ ipcMain.on("open-editor", (_, payload) => {
   });
 
   const { noteTitle } = payload;
-  if (state.openEditors[noteTitle]) {
-    state.openEditors[noteTitle].editorWindow.focus();
+  const editor = state.openEditors.find(e => e.noteTitle === noteTitle);
+
+  if (editor) {
+    editor.editorWindow.focus();
   } else {
     const editorWindow = createEditorWindow(noteTitle);
     editorWindow.editorProps = payload;
-    state.openEditors[noteTitle] = {
+    state.openEditors.push({
       editorWindow,
       ...payload
-    };
+    });
   }
 });
 
-ipcMain.on("update-editor-title", (_, { title, newTitle }) => {
+ipcMain.on("update-editor-title", (_, { title, newTitle, newFileName }) => {
   // TODO: I think we need stronger guarantees here that the state is consistent
-  if (state.openEditors[title]) {
-    state.openEditors[newTitle] = state.openEditors[title];
-    state.openEditors[newTitle].noteTitle = newTitle;
-    state.openEditors[newTitle].editorWindow.setTitle(newTitle);
-    delete state.openEditors[title];
+  const editor = state.openEditors.find(e => e.noteTitle === title);
+  if (editor) {
+    editor.noteTitle = newTitle;
+    editor.noteFileName = newFileName;
+    editor.editorWindow.setTitle(newTitle);
+    editor.editorWindow.editorProps = {
+      noteTitle: newTitle,
+      noteFileName: newFileName
+    };
+    state.openEditors = state.openEditors.filter(e => e.noteTitle !== title);
   }
 });
 
 ipcMain.on("delete-editor", (_, { title }) => {
-  if (state.openEditors[title]) {
-    state.openEditors[title].editorWindow.close();
-    delete state.openEditors[title];
+  const editor = state.openEditors.find(e => e.noteTitle === title);
+  if (editor) {
+    editor.close();
+    state.openEditors = state.openEditors.filter(e => e.noteTitle !== title);
   }
 });
