@@ -1,9 +1,12 @@
 {
   "name": "hypermark",
+  "description": "📓Stickies meets nvALT markdown editor",
   "version": "0.1.0",
   "private": true,
   "author": "Michal Czaplinski <mmczaplinski@gmail.com>",
-  "description": "A Hyper Markdown App",
+  "homepage": "https://github.com/michalczaplinski/hypermark",
+  "repository": "https://github.com/michalczaplinski/hypermark",
+  "license": "MIT",
   "scripts": {
     "dev": "electron-webpack dev",
     "compile": "electron-webpack",

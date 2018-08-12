@@ -288,7 +288,6 @@ class Main extends Component {
       noteFileName,
       noteTitle: noteName
     });
-    this.hideWindow();
   };
 
   renameNote = (oldName, newName) => {

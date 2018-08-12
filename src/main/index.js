@@ -235,5 +235,3 @@ ipcMain.on("search-input-change", (_, { searchListLength }) => {
     true
   );
 });
-
-// this is just a test
