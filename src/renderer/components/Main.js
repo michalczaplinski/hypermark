@@ -176,6 +176,9 @@ class Main extends Component {
     this.setState({ searchValue });
     const currentSearchNotes = await this.search(searchValue, allNotes);
     this.setState({ currentSearchNotes });
+    ipcRenderer.send("search-input-change", {
+      searchListLength: currentSearchNotes.length
+    });
   };
 
   search = async (searchValue, allNotes) => {
@@ -317,6 +320,9 @@ class Main extends Component {
   hideWindow() {
     this.setState({ searchValue: "" });
     this.mainWindow.hide();
+    ipcRenderer.send("search-input-change", {
+      searchListLength: 6
+    });
   }
 
   render() {
@@ -405,13 +411,11 @@ class Main extends Component {
               ) : (
                 note.noteName
               )}
-              <span>
+              <div>
                 {moment(note.lastModified).isAfter(moment().subtract(1, "days"))
                   ? moment(note.lastModified).fromNow()
                   : moment(note.lastModified).format("MMMM Do YYYY, h:mma")}
-              </span>
-              title: {note.indexOfValueInTitle}
-              content: {note.indexOfValue}
+              </div>
               <button
                 onClick={e => {
                   e.stopPropagation();

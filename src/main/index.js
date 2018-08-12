@@ -12,10 +12,20 @@ const state = {
   openEditors: []
 };
 
+const SEARCHBAR_HEIGHT = 80;
+const ITEM_HEIGHT = 74;
+
 const isDevelopment = process.env.NODE_ENV !== "production";
 
 function createMainWindow() {
-  const window = new BrowserWindow({ width: 400, height: 500, frame: false });
+  const window = new BrowserWindow({
+    width: 400,
+    height: SEARCHBAR_HEIGHT + ITEM_HEIGHT * 6,
+    maxHeight: SEARCHBAR_HEIGHT + ITEM_HEIGHT * 6,
+    frame: false,
+    fullscreenable: false,
+    disableAutoHideCursor: true
+  });
 
   if (isDevelopment || process.env.DEBUG_PROD === "true") {
     window.webContents.openDevTools();
@@ -211,4 +221,17 @@ ipcMain.on("delete-editor", (_, { title }) => {
     editor.close();
     state.openEditors = state.openEditors.filter(e => e.noteTitle !== title);
   }
+});
+
+/*
+ * We do this on the main thread, even though we have a reference to the mainWindow
+ * on the renderer thread because the performace is better this way
+ */
+ipcMain.on("search-input-change", (_, { searchListLength }) => {
+  const [width] = state.mainWindow.getContentSize();
+  state.mainWindow.setContentSize(
+    width,
+    SEARCHBAR_HEIGHT + ITEM_HEIGHT * searchListLength,
+    true
+  );
 });
