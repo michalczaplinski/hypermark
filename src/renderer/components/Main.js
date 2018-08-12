@@ -405,13 +405,11 @@ class Main extends Component {
               ) : (
                 note.noteName
               )}
-              <span>
+              <div>
                 {moment(note.lastModified).isAfter(moment().subtract(1, "days"))
                   ? moment(note.lastModified).fromNow()
                   : moment(note.lastModified).format("MMMM Do YYYY, h:mma")}
-              </span>
-              title: {note.indexOfValueInTitle}
-              content: {note.indexOfValue}
+              </div>
               <button
                 onClick={e => {
                   e.stopPropagation();
