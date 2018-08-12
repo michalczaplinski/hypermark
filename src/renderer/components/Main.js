@@ -176,6 +176,9 @@ class Main extends Component {
     this.setState({ searchValue });
     const currentSearchNotes = await this.search(searchValue, allNotes);
     this.setState({ currentSearchNotes });
+    ipcRenderer.send("search-input-change", {
+      searchListLength: currentSearchNotes.length
+    });
   };
 
   search = async (searchValue, allNotes) => {
@@ -317,6 +320,9 @@ class Main extends Component {
   hideWindow() {
     this.setState({ searchValue: "" });
     this.mainWindow.hide();
+    ipcRenderer.send("search-input-change", {
+      searchListLength: 6
+    });
   }
 
   render() {
