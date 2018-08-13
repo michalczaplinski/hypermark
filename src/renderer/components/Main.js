@@ -4,11 +4,13 @@ import { ipcRenderer,  remote } from "electron"; //eslint-disable-line
 import { orderBy } from "lodash";
 import moment from "moment";
 import Mousetrap from "mousetrap";
-
-import { promisify } from "util";
 import path from "path";
 import fs from "fs";
 
+import { promisify } from "util";
+import Note from "./Note";
+import undoStack from "../undoStack";
+import { focusStyles } from "../../style";
 import globalState from "../../globals";
 
 const asyncReadFile = promisify(fs.readFile);
@@ -17,28 +19,6 @@ const asyncStat = promisify(fs.stat);
 const asyncRmFile = promisify(fs.unlink);
 const asyncWriteFile = promisify(fs.writeFile);
 const asyncRename = promisify(fs.rename);
-
-class UndoStack {
-  constructor(timeout) {
-    this.stack = [];
-    this.timeout = timeout;
-  }
-
-  push(note) {
-    return this.stack.push(note);
-  }
-
-  undo() {
-    const undoFunc = this.stack.pop();
-    try {
-      undoFunc();
-    } catch (e) {
-      console.warn("nothing left on the stack");
-    }
-  }
-}
-
-const undoStack = new UndoStack();
 
 const TopBarWrapper = styled.div`
   display: flex;
@@ -80,31 +60,7 @@ const AddNote = styled.button`
     background-color: lightblue;
   }
   &:focus {
-    cursor: pointer;
-    background-color: lightblue;
-  }
-`;
-
-const File = styled.div`
-  display: block;
-  height: 70px;
-  width: 100%;
-  background-color: lightgreen;
-  padding: 10px;
-  margin: 3px;
-  font-size: 17px;
-  text-align: center;
-  border: none;
-  transition: all 150ms ease;
-  border-radius: 3px;
-
-  &:hover {
-    cursor: pointer;
-  }
-
-  &:focus {
-    cursor: pointer;
-    background-color: lightblue;
+    ${focusStyles};
   }
 `;
 
@@ -113,6 +69,7 @@ class Main extends Component {
     super(props);
     this.state = {
       allNotes: [],
+      searchFocused: true,
       currentSearchNotes: [],
       searchValue: "",
       indexOfNoteBeingRenamed: undefined
@@ -328,6 +285,7 @@ class Main extends Component {
     const {
       currentSearchNotes,
       searchValue,
+      searchFocused,
       indexOfNoteBeingRenamed
     } = this.state;
 
@@ -353,6 +311,8 @@ class Main extends Component {
             type="text"
             innerRef={this.input}
             value={searchValue}
+            onBlur={() => this.setState({ searchFocused: false })}
+            onFocus={() => this.setState({ searchFocused: true })}
             onChange={e => this.searchWrapper(e.target.value)}
             onKeyDown={e => {
               if (e.key === "Escape") {
@@ -368,25 +328,37 @@ class Main extends Component {
               }
             }}
           />
-          <AddNote
-            onClick={() =>
-              this.createNewNote(searchValue, "").then(() =>
-                this.openNote(searchValue)
-              )
-            }
-          >
-            +
-          </AddNote>
+          {notes.length < 1 && (
+            <AddNote
+              onClick={() =>
+                this.createNewNote(searchValue, "").then(() =>
+                  this.openNote(searchValue)
+                )
+              }
+            >
+              +
+            </AddNote>
+          )}
         </TopBarWrapper>
         <div>
           {notes.map((note, index) => (
-            <File
+            <Note
+              focus={searchFocused}
+              tabIndex={index === 0 ? null : "0"}
               key={note.noteName}
               onClick={() => {
                 if (index === indexOfNoteBeingRenamed) {
                   return;
                 }
                 this.openNote(note.noteName);
+              }}
+              onKeyDown={e => {
+                if (index === indexOfNoteBeingRenamed) {
+                  return;
+                }
+                if (e.key === "Enter") {
+                  this.openNote(note.noteName);
+                }
               }}
             >
               {index === indexOfNoteBeingRenamed ? (
@@ -416,6 +388,7 @@ class Main extends Component {
                   : moment(note.lastModified).format("MMMM Do YYYY, h:mma")}
               </div>
               <button
+                tabIndex="-1"
                 onClick={e => {
                   e.stopPropagation();
                   this.setState({ indexOfNoteBeingRenamed: index });
@@ -424,6 +397,7 @@ class Main extends Component {
                 rename
               </button>
               <button
+                tabIndex="-1"
                 onClick={e => {
                   e.stopPropagation();
                   this.deleteNote(note.noteName);
@@ -431,7 +405,7 @@ class Main extends Component {
               >
                 delete
               </button>
-            </File>
+            </Note>
           ))}
         </div>
       </div>
