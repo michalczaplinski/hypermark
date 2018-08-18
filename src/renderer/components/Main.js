@@ -360,6 +360,7 @@ class Main extends Component {
           />
           {notes.length < 1 && (
             <AddNote
+              autoFocus
               onClick={() =>
                 this.createNewNote(searchValue, "").then(() =>
                   this.openNote(searchValue)
@@ -390,12 +391,15 @@ class Main extends Component {
                 }
                 this.openNote(note.noteName);
               }}
-              onKeyDown={e => {
+              onKeyUp={e => {
                 if (index === indexOfNoteBeingRenamed) {
                   return;
                 }
                 if (e.key === "Enter") {
                   this.openNote(note.noteName);
+                }
+                if (e.key === "Backspace") {
+                  this.deleteNote(note.noteName);
                 }
               }}
             >
