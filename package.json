@@ -21,6 +21,7 @@
     "lodash": "^4.17.10",
     "moment": "^2.22.2",
     "mousetrap": "^1.6.2",
+    "mousetrap-global-bind": "^1.1.0",
     "react": "^16.4.1",
     "react-dom": "^16.4.1",
     "source-map-support": "^0.5.5",

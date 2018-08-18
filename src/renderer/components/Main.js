@@ -4,6 +4,7 @@ import { ipcRenderer,  remote } from "electron"; //eslint-disable-line
 import { orderBy } from "lodash";
 import moment from "moment";
 import Mousetrap from "mousetrap";
+import "mousetrap-global-bind";
 import path from "path";
 import fs from "fs";
 
@@ -70,26 +71,46 @@ class Main extends Component {
     this.state = {
       allNotes: [],
       searchFocused: true,
+      currentFocusedNoteIndex: 0,
       currentSearchNotes: [],
       searchValue: "",
       indexOfNoteBeingRenamed: undefined
     };
     this.input = React.createRef();
+    this.noteRefs = [];
     this.mainWindow = remote.getCurrentWindow();
 
     this.scanForNotes();
   }
 
   componentDidMount() {
-    Mousetrap.bind("esc", () => {
+    Mousetrap.bindGlobal("esc", () => {
       this.mainWindow.hide();
     });
-    Mousetrap.bind(["command+z", "ctrl+z"], () => {
+    Mousetrap.bindGlobal(["command+z"], () => {
       undoStack.undo();
     });
     Mousetrap.bind("command+l", () => {
       this.input.current.focus();
     });
+
+    Mousetrap.bindGlobal(["command+j", "down"], () => {
+      const {
+        currentFocusedNoteIndex: i,
+        currentSearchNotes: notes
+      } = this.state;
+
+      const noteToFocus = this.noteRefs[Math.min(notes.length - 1, i + 1)];
+      noteToFocus.focus();
+    });
+
+    Mousetrap.bindGlobal(["command+k", "up"], () => {
+      const { currentFocusedNoteIndex: i } = this.state;
+
+      const noteToFocus = this.noteRefs[Math.max(0, i - 1)];
+      noteToFocus.focus();
+    });
+
     ipcRenderer.on("focus", () => {
       this.input.current.focus();
       this.scanForNotes();
@@ -309,15 +330,22 @@ class Main extends Component {
           <Search
             autoFocus
             type="text"
-            innerRef={this.input}
+            innerRef={el => {
+              this.noteRefs[0] = el;
+              this.input = el;
+            }}
             value={searchValue}
             onBlur={() => this.setState({ searchFocused: false })}
-            onFocus={() => this.setState({ searchFocused: true })}
+            onFocus={() => {
+              this.setState({
+                currentFocusedNoteIndex: 0,
+                searchFocused: true
+              });
+            }}
             onChange={e => this.searchWrapper(e.target.value)}
             onKeyDown={e => {
-              if (e.key === "Escape") {
-                e.preventDefault();
-                this.hideWindow();
+              if (e.key === "Tab") {
+                this.setState({ currentFocusedNoteIndex: 1 });
               }
               if (e.key === "Enter" && notes.length > 0) {
                 this.openNote(notes[0].noteName);
@@ -343,9 +371,17 @@ class Main extends Component {
         <div>
           {notes.map((note, index) => (
             <Note
-              focus={searchFocused}
-              tabIndex={index === 0 ? null : "0"}
               key={note.noteName}
+              focus={searchFocused}
+              innerRef={el => {
+                if (index !== 0) {
+                  this.noteRefs[index] = el;
+                }
+              }}
+              onFocus={() => {
+                this.setState({ currentFocusedNoteIndex: index });
+              }}
+              tabIndex={index === 0 ? null : "0"}
               onClick={() => {
                 if (index === indexOfNoteBeingRenamed) {
                   return;
