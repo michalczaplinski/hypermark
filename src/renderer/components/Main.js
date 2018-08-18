@@ -112,7 +112,9 @@ class Main extends Component {
     });
 
     ipcRenderer.on("focus", () => {
-      this.input.current.focus();
+      if (this.input.current) {
+        this.input.current.focus();
+      }
       this.scanForNotes();
     });
 
