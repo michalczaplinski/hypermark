@@ -145,36 +145,57 @@ app.on("activate", () => {
   state.mainWindow.focus();
 });
 
-app.on("ready", () => {
-  state.mainWindow = createMainWindow();
-  let menuBuilder = new MainMenuBuilder(state.mainWindow);
-  menuBuilder.buildMenu();
+const gotTheLock = app.requestSingleInstanceLock();
 
-  const ret = globalShortcut.register("CommandOrControl+Shift+L", () => {
-    if (!state.mainWindow) {
-      state.mainWindow = createMainWindow();
-      menuBuilder = new MainMenuBuilder(state.mainWindow);
-      menuBuilder.buildMenu();
-    } else if (state.mainWindow.isVisible() && !state.mainWindow.isFocused()) {
-      state.mainWindow.focus();
-    } else if (state.mainWindow.isVisible() && state.mainWindow.isFocused()) {
-      state.mainWindow.hide();
-    } else {
-      state.mainWindow.show();
+if (!gotTheLock) {
+  app.quit();
+} else {
+  app.on("second-instance", (event, commandLine, workingDirectory) => {
+    // Someone tried to run a second instance, we should focus our window.
+    if (state.mainWindow) {
+      if (state.mainWindow.isMinimized()) state.mainWindow.restore();
       state.mainWindow.focus();
     }
   });
 
-  if (!ret) {
-    console.error("registration failed");
-  }
-});
+  app.on("ready", () => {
+    state.mainWindow = createMainWindow();
+    let menuBuilder = new MainMenuBuilder(state.mainWindow);
+    menuBuilder.buildMenu();
+
+    const ret = globalShortcut.register("CommandOrControl+Shift+L", () => {
+      if (!state.mainWindow) {
+        state.mainWindow = createMainWindow();
+        menuBuilder = new MainMenuBuilder(state.mainWindow);
+        menuBuilder.buildMenu();
+      } else if (
+        state.mainWindow.isVisible() &&
+        !state.mainWindow.isFocused()
+      ) {
+        state.mainWindow.focus();
+      } else if (state.mainWindow.isVisible() && state.mainWindow.isFocused()) {
+        state.mainWindow.hide();
+      } else {
+        state.mainWindow.show();
+        state.mainWindow.focus();
+      }
+    });
+
+    if (!ret) {
+      console.error("registration failed");
+    }
+  });
+}
 
 app.on("will-quit", () => {
   globalShortcut.unregister("CommandOrControl+Shift+L");
   globalShortcut.unregister("CommandOrControl+Shift+Z");
   globalShortcut.unregisterAll();
 });
+
+// ///////////////////////////////////////////////////////////////////////////
+// IPC MAIN CALLS
+// ///////////////////////////////////////////////////////////////////////////
 
 ipcMain.on("open-editor", (_, payload) => {
   validateObject(payload, {
