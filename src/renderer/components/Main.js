@@ -21,12 +21,24 @@ const asyncRmFile = promisify(fs.unlink);
 const asyncWriteFile = promisify(fs.writeFile);
 const asyncRename = promisify(fs.rename);
 
+const TopAbsoluteWrapper = styled.div`
+  position: fixed;
+  top: 0;
+  width: 100%;
+  height: 80px;
+  padding-bottom: 5px;
+  padding-top: 5px;
+  background-color: white;
+`;
+
 const TopBarWrapper = styled.div`
   display: flex;
   flex-flow: row nowrap;
-  width: 100%;
-  height: 70px;
-  margin-bottom: 5px;
+`;
+
+const BodyWrapper = styled.div`
+  margin-top: 72px;
+  overflow: scroll;
 `;
 
 const Search = styled.input`
@@ -321,59 +333,61 @@ class Main extends Component {
     );
 
     return (
-      <div>
-        <TopBarWrapper>
-          <button
-            onClick={e => {
-              undoStack.undo();
-              e.preventDefault();
-            }}
-          >
-            UNDO
-          </button>
-          <Search
-            autoFocus
-            type="text"
-            innerRef={el => {
-              this.noteRefs[0] = el;
-              this.input = el;
-            }}
-            value={searchValue}
-            onBlur={() => this.setState({ searchFocused: false })}
-            onFocus={() => {
-              this.setState({
-                currentFocusedNoteIndex: 0,
-                searchFocused: true
-              });
-            }}
-            onChange={e => this.searchWrapper(e.target.value)}
-            onKeyDown={e => {
-              if (e.key === "Tab") {
-                this.setState({ currentFocusedNoteIndex: 1 });
-              }
-              if (e.key === "Enter" && notes.length > 0) {
-                this.openNote(notes[0].noteName);
-              } else if (e.which === 13 && notes.length === 0) {
-                this.createNewNote(searchValue, "").then(() =>
-                  this.openNote(searchValue)
-                );
-              }
-            }}
-          />
-          {searchValue !== "" &&
-            !notes.map(({ noteName }) => noteName).includes(searchValue) && (
-              <AddNote
-                onClick={() =>
+      <div style={{ overflow: "hidden" }}>
+        <TopAbsoluteWrapper>
+          <TopBarWrapper>
+            <button
+              onClick={e => {
+                undoStack.undo();
+                e.preventDefault();
+              }}
+            >
+              UNDO
+            </button>
+            <Search
+              autoFocus
+              type="text"
+              innerRef={el => {
+                this.noteRefs[0] = el;
+                this.input = el;
+              }}
+              value={searchValue}
+              onBlur={() => this.setState({ searchFocused: false })}
+              onFocus={() => {
+                this.setState({
+                  currentFocusedNoteIndex: 0,
+                  searchFocused: true
+                });
+              }}
+              onChange={e => this.searchWrapper(e.target.value)}
+              onKeyDown={e => {
+                if (e.key === "Tab") {
+                  this.setState({ currentFocusedNoteIndex: 1 });
+                }
+                if (e.key === "Enter" && notes.length > 0) {
+                  this.openNote(notes[0].noteName);
+                } else if (e.which === 13 && notes.length === 0) {
                   this.createNewNote(searchValue, "").then(() =>
                     this.openNote(searchValue)
-                  )
+                  );
                 }
-              >
-                +
-              </AddNote>
-            )}
-        </TopBarWrapper>
-        <div>
+              }}
+            />
+            {searchValue !== "" &&
+              !notes.map(({ noteName }) => noteName).includes(searchValue) && (
+                <AddNote
+                  onClick={() =>
+                    this.createNewNote(searchValue, "").then(() =>
+                      this.openNote(searchValue)
+                    )
+                  }
+                >
+                  +
+                </AddNote>
+              )}
+          </TopBarWrapper>
+        </TopAbsoluteWrapper>
+        <BodyWrapper>
           {notes.map((note, index) => (
             <Note
               key={note.noteName}
@@ -451,7 +465,7 @@ class Main extends Component {
               </button>
             </Note>
           ))}
-        </div>
+        </BodyWrapper>
       </div>
     );
   }
