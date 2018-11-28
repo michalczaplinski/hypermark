@@ -8,7 +8,7 @@
   font-family: -apple-system, BlinkMacSystemFont, "Open Sans", "Helvetica Neue", Helvetica, Arial, "Hiragino Sans GB", "WenQuanYi Micro Hei", "Noto Sans CJK SC", "Microsoft YaHei", STHeiti, "Microsoft Jhenghei", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
   -webkit-font-smoothing: antialiased;
   line-height: 1.5;
-  font-size: 12pt;
+  font-size: 11pt;
   background: #FFF;
   color: #000;
 }
@@ -367,8 +367,8 @@
   box-sizing: border-box;
   border-right: 1px dashed #CCC;
   overflow: hidden;
-  font-size: 0.5em;
-  line-height: 200%;
+  font-size: 1em;
+  line-height: 150%;
 }
 .cm-s-hypermd-light pre.HyperMD-list-line {
   padding-top: 0.3em;
@@ -417,11 +417,13 @@
 .cm-s-hypermd-light pre.HyperMD-list-line-9 {
   padding-left: 285px;
 }
+
 .cm-s-hypermd-light span.cm-formatting-list {
   margin-left: -30px;
-  font-family: "HyperMD-Bullets";
+  /* font-family: "HyperMD-Bullets"; */
   color: #666;
 }
+
 .cm-s-hypermd-light span.cm-formatting-list.cm-list-2 {
   text-shadow: 0 1px #666, 0 -1px #666, 1px 0 #666, -1px 0 #666;
   color: #fff;
