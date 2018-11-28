@@ -69,7 +69,9 @@ class Main extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      allNotes: [],
+      allNotes: [
+        /* { noteName, lastModified } */
+      ],
       searchFocused: true,
       currentFocusedNoteIndex: 0,
       currentSearchNotes: [],
@@ -358,18 +360,18 @@ class Main extends Component {
               }
             }}
           />
-          {notes.length < 1 && (
-            <AddNote
-              autoFocus
-              onClick={() =>
-                this.createNewNote(searchValue, "").then(() =>
-                  this.openNote(searchValue)
-                )
-              }
-            >
-              +
-            </AddNote>
-          )}
+          {searchValue !== "" &&
+            !notes.map(({ noteName }) => noteName).includes(searchValue) && (
+              <AddNote
+                onClick={() =>
+                  this.createNewNote(searchValue, "").then(() =>
+                    this.openNote(searchValue)
+                  )
+                }
+              >
+                +
+              </AddNote>
+            )}
         </TopBarWrapper>
         <div>
           {notes.map((note, index) => (
