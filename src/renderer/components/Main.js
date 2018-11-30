@@ -24,10 +24,12 @@ const asyncRename = promisify(fs.rename);
 const TopAbsoluteWrapper = styled.div`
   position: fixed;
   top: 0;
+  left: 0;
+  right: 0;
+  padding: 5px;
+  padding-bottom: 10px;
   width: 100%;
   height: 80px;
-  padding-bottom: 5px;
-  padding-top: 5px;
   background-color: white;
 `;
 
@@ -345,6 +347,7 @@ class Main extends Component {
               UNDO
             </button>
             <Search
+              placeholder="type to search or create a new note"
               autoFocus
               type="text"
               innerRef={el => {

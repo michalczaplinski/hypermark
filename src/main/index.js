@@ -20,8 +20,9 @@ const isDevelopment = process.env.NODE_ENV !== "production";
 function createMainWindow() {
   const window = new BrowserWindow({
     width: 400,
-    height: SEARCHBAR_HEIGHT + ITEM_HEIGHT * 6,
-    maxHeight: SEARCHBAR_HEIGHT + ITEM_HEIGHT * 6,
+    height: SEARCHBAR_HEIGHT + ITEM_HEIGHT * 6 - 4,
+    // minus 4 because we don't count the top and bottom border fo the body
+    maxHeight: SEARCHBAR_HEIGHT + ITEM_HEIGHT * 6 - 4,
     frame: false,
     fullscreenable: false,
     disableAutoHideCursor: true
