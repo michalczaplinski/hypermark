@@ -7,15 +7,11 @@ const StyledNote = styled.div`
   display: block;
   height: 70px;
   width: 100%;
-  background-color: lightgreen;
+  background-color: transparent;
   padding: 10px;
-  margin-top: 3px;
-  margin-bottom: 3px;
   font-size: 17px;
-  text-align: center;
-  border: none;
   transition: all 150ms ease;
-  border-radius: 3px;
+  border-radius: 5px;
 
   &:hover {
     cursor: pointer;
