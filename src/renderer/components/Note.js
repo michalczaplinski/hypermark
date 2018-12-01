@@ -99,7 +99,7 @@ class Note extends Component {
     const { isBeingRenamed, isHovered } = this.state;
     return (
       <StyledNote
-        onMouseEnter={() => this.setState({ isHovered: true })}
+        onMouseOver={() => this.setState({ isHovered: true })}
         onMouseLeave={() => this.setState({ isHovered: false })}
         onClick={() => {
           if (isBeingRenamed) {
