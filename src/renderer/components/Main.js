@@ -2,7 +2,6 @@ import React, { Component } from "react";
 import styled from "styled-components";
 import { ipcRenderer,  remote } from "electron"; //eslint-disable-line
 import { orderBy } from "lodash";
-import moment from "moment";
 import Mousetrap from "mousetrap";
 import "mousetrap-global-bind";
 import path from "path";
@@ -27,9 +26,9 @@ const TopAbsoluteWrapper = styled.div`
   left: 0;
   right: 0;
   padding: 5px;
-  padding-bottom: 10px;
+  z-index: 10;
   width: 100%;
-  height: 80px;
+  height: 70px;
   background-color: white;
 `;
 
@@ -39,7 +38,7 @@ const TopBarWrapper = styled.div`
 `;
 
 const BodyWrapper = styled.div`
-  margin-top: 60px;
+  margin-top: 65px;
   overflow: scroll;
 `;
 
@@ -65,8 +64,8 @@ const Search = styled.input`
 
 const AddNote = styled.button`
   display: block;
-  height: 60px;
-  width: 60px;
+  height: 55px;
+  width: 55px;
   border: none;
   border-radius: 3px;
   margin: 0;

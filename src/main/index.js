@@ -12,7 +12,7 @@ const state = {
   openEditors: []
 };
 
-const SEARCHBAR_HEIGHT = 60;
+const SEARCHBAR_HEIGHT = 70;
 const ITEM_HEIGHT = 60;
 
 const isDevelopment = process.env.NODE_ENV !== "production";
@@ -21,7 +21,6 @@ function createMainWindow() {
   const window = new BrowserWindow({
     width: 400,
     height: SEARCHBAR_HEIGHT + ITEM_HEIGHT * 6,
-    // minus 4 because we don't count the top and bottom border fo the body
     maxHeight: SEARCHBAR_HEIGHT + ITEM_HEIGHT * 6,
     frame: false,
     fullscreenable: false,
@@ -253,7 +252,7 @@ ipcMain.on("search-input-change", (_, { searchListLength }) => {
   const [width] = state.mainWindow.getContentSize();
   state.mainWindow.setContentSize(
     width,
-    SEARCHBAR_HEIGHT + ITEM_HEIGHT * searchListLength,
+    SEARCHBAR_HEIGHT + ITEM_HEIGHT * searchListLength + 5, // 5 is for the bottom edge
     true
   );
 });
