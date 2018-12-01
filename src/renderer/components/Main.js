@@ -39,13 +39,13 @@ const TopBarWrapper = styled.div`
 `;
 
 const BodyWrapper = styled.div`
-  margin-top: 72px;
+  margin-top: 60px;
   overflow: scroll;
 `;
 
 const Search = styled.input`
   flex: 1;
-  height: 70px;
+  height: 60px;
   margin: 0px;
   padding: 5px;
   font-size: 17px;
@@ -57,12 +57,16 @@ const Search = styled.input`
     outline-offset: 0px;
     outline: none;
   }
+
+  &::placeholder {
+    color: #cccccc;
+  }
 `;
 
 const AddNote = styled.button`
   display: block;
-  height: 70px;
-  width: 70px;
+  height: 60px;
+  width: 60px;
   border: none;
   border-radius: 3px;
   margin: 0;
@@ -89,8 +93,7 @@ class Main extends Component {
       searchFocused: true,
       currentFocusedNoteIndex: 0,
       currentSearchNotes: [],
-      searchValue: "",
-      indexOfNoteBeingRenamed: undefined
+      searchValue: ""
     };
     this.input = React.createRef();
     this.noteRefs = [];
@@ -107,7 +110,7 @@ class Main extends Component {
       undoStack.undo();
     });
     Mousetrap.bind("command+l", () => {
-      this.input.current.focus();
+      this.input.focus();
     });
 
     Mousetrap.bindGlobal(["command+j", "down"], () => {
@@ -128,12 +131,13 @@ class Main extends Component {
     });
 
     ipcRenderer.on("focus", () => {
-      if (this.input.current) {
-        this.input.current.focus();
+      if (this.input) {
+        this.input.focus();
       }
       this.scanForNotes();
     });
 
+    // not sure if I need the "current"
     if (this.input.current) {
       this.input.current.focus();
     }
@@ -325,7 +329,7 @@ class Main extends Component {
       currentSearchNotes,
       searchValue,
       searchFocused,
-      indexOfNoteBeingRenamed
+      currentFocusedNoteIndex
     } = this.state;
 
     const notes = orderBy(
@@ -347,7 +351,7 @@ class Main extends Component {
               UNDO
             </button>
             <Search
-              placeholder="type to search or create a new note"
+              placeholder="Type to search or create a new note..."
               autoFocus
               type="text"
               innerRef={el => {
@@ -394,7 +398,12 @@ class Main extends Component {
           {notes.map((note, index) => (
             <Note
               key={note.noteName}
+              note={note}
+              renameNote={this.renameNote}
+              deleteNote={this.deleteNote}
+              openNote={this.openNote}
               focus={searchFocused}
+              focused={currentFocusedNoteIndex === index}
               innerRef={el => {
                 if (index !== 0) {
                   this.noteRefs[index] = el;
@@ -404,69 +413,7 @@ class Main extends Component {
                 this.setState({ currentFocusedNoteIndex: index });
               }}
               tabIndex={index === 0 ? null : "0"}
-              onClick={() => {
-                if (index === indexOfNoteBeingRenamed) {
-                  return;
-                }
-                this.openNote(note.noteName);
-              }}
-              onKeyUp={e => {
-                if (index === indexOfNoteBeingRenamed) {
-                  return;
-                }
-                if (e.key === "Enter") {
-                  this.openNote(note.noteName);
-                }
-                if (e.key === "Backspace") {
-                  this.deleteNote(note.noteName);
-                }
-              }}
-            >
-              {index === indexOfNoteBeingRenamed ? (
-                <input
-                  ref={input => input && input.focus()}
-                  type="text"
-                  onFocus={e => e.target.select()}
-                  defaultValue={note.noteName}
-                  onKeyDown={e => {
-                    if (e.key === "Enter") {
-                      e.target.blur();
-                      this.renameNote(note.noteName, e.target.value);
-                    } else if (e.key === "Escape") {
-                      e.target.blur();
-                    }
-                  }}
-                  onBlur={() =>
-                    this.setState({ indexOfNoteBeingRenamed: undefined })
-                  }
-                />
-              ) : (
-                note.noteName
-              )}
-              <div>
-                {moment(note.lastModified).isAfter(moment().subtract(1, "days"))
-                  ? moment(note.lastModified).fromNow()
-                  : moment(note.lastModified).format("MMMM Do YYYY, h:mma")}
-              </div>
-              <button
-                tabIndex="-1"
-                onClick={e => {
-                  e.stopPropagation();
-                  this.setState({ indexOfNoteBeingRenamed: index });
-                }}
-              >
-                rename
-              </button>
-              <button
-                tabIndex="-1"
-                onClick={e => {
-                  e.stopPropagation();
-                  this.deleteNote(note.noteName);
-                }}
-              >
-                delete
-              </button>
-            </Note>
+            />
           ))}
         </BodyWrapper>
       </div>
