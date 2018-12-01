@@ -250,9 +250,9 @@ ipcMain.on("delete-editor", (_, { title }) => {
  */
 ipcMain.on("search-input-change", (_, { searchListLength }) => {
   const [width] = state.mainWindow.getContentSize();
-  state.mainWindow.setContentSize(
-    width,
-    SEARCHBAR_HEIGHT + ITEM_HEIGHT * searchListLength + 5, // 5 is for the bottom edge
-    true
-  );
+  let height = SEARCHBAR_HEIGHT + ITEM_HEIGHT * searchListLength;
+  // the 5 is for the bottom edge
+  height = searchListLength === 0 ? height : height + 5;
+
+  state.mainWindow.setContentSize(width, height, true);
 });
