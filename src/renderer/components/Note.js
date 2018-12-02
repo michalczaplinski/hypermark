@@ -10,7 +10,6 @@ const StyledNote = styled.div`
   width: 100%;
   background-color: transparent;
   padding: 10px;
-  font-size: 19px;
   transition: all 150ms ease;
   border-radius: 5px;
 
@@ -81,6 +80,26 @@ const Option = styled.div`
   }
 `;
 
+const RenamingInput = styled.input`
+  font-size: 21px;
+  width: 370px;
+  height: 25px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  color: grey;
+
+  background-color: transparent;
+  outline: none;
+  border: 0;
+  padding: 0;
+  font-style: italic;
+
+  &:focus {
+    outline-offset: 0px;
+  }
+`;
+
 class Note extends Component {
   state = {
     isHovered: false,
@@ -98,7 +117,7 @@ class Note extends Component {
     } = this.props;
     const { isBeingRenamed, isHovered } = this.state;
     return (
-      <StyledNote
+      <StyledNote // eslint-disable-line
         onMouseOver={() => this.setState({ isHovered: true })}
         onMouseLeave={() => this.setState({ isHovered: false })}
         onClick={() => {
@@ -121,8 +140,8 @@ class Note extends Component {
         {...props}
       >
         {isBeingRenamed ? (
-          <input
-            ref={input => input && input.focus()}
+          <RenamingInput
+            innerRef={input => input && input.focus()}
             type="text"
             onFocus={e => e.target.select()}
             defaultValue={noteName}
@@ -139,7 +158,6 @@ class Note extends Component {
         ) : (
           <Title hovered={isHovered}>{noteName}</Title>
         )}
-
         {isHovered && (
           <OptionsContainer>
             <Option
