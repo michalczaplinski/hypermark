@@ -9,6 +9,7 @@ import fs from "fs";
 
 import { promisify } from "util";
 import Note from "./Note";
+import UndoButton from "./UndoButton";
 import undoStack from "../undoStack";
 import { focusStyles } from "../../style";
 import globalState from "../../globals";
@@ -62,6 +63,12 @@ const Search = styled.input`
   }
 `;
 
+const UndoContainer = styled.div`
+  position: absolute;
+  top: 5px;
+  right: 5px;
+`;
+
 const AddNote = styled.button`
   display: block;
   height: 55px;
@@ -90,6 +97,7 @@ class Main extends Component {
         /* { noteName, lastModified } */
       ],
       searchFocused: true,
+      undoVisible: false,
       currentFocusedNoteIndex: 0,
       currentSearchNotes: [],
       searchValue: ""
@@ -272,6 +280,10 @@ class Main extends Component {
       .then(() => {
         ipcRenderer.send("delete-editor", { title: noteName });
         this.scanForNotes();
+        this.setState({ undoVisible: true });
+      })
+      .then(() => {
+        setTimeout(() => this.setState({ undoVisible: false }), 5000);
       })
       .catch(err => {
         console.warn(err);
@@ -309,6 +321,9 @@ class Main extends Component {
           });
           this.scanForNotes();
         })
+        .then(() => {
+          setTimeout(() => this.setState({ undoVisible: false }), 5000);
+        })
         .catch(e => {
           console.warn(e);
         });
@@ -328,7 +343,8 @@ class Main extends Component {
       currentSearchNotes,
       searchValue,
       searchFocused,
-      currentFocusedNoteIndex
+      currentFocusedNoteIndex,
+      undoVisible
     } = this.state;
 
     const notes = orderBy(
@@ -341,14 +357,21 @@ class Main extends Component {
       <div style={{ overflow: "hidden" }}>
         <TopAbsoluteWrapper>
           <TopBarWrapper>
-            <button
-              onClick={e => {
-                undoStack.undo();
-                e.preventDefault();
-              }}
-            >
-              UNDO
-            </button>
+            {undoVisible && (
+              <UndoContainer>
+                <UndoButton
+                  onClick={e => {
+                    undoStack.undo();
+                    e.preventDefault();
+                    this.setState({ undoVisible: false });
+                  }}
+                  hideUndo={() => {
+                    this.setState({ undoVisible: false });
+                  }}
+                />
+              </UndoContainer>
+            )}
+
             <Search
               placeholder="Type to search or create a new note..."
               autoFocus

@@ -16,6 +16,10 @@ class UndoStack {
       console.warn("nothing left on the stack");
     }
   }
+
+  pop() {
+    this.stack.pop();
+  }
 }
 
 const undoStack = new UndoStack();
