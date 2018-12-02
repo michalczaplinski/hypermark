@@ -239,7 +239,7 @@ ipcMain.on("update-editor-title", (_, { title, newTitle, newFileName }) => {
 ipcMain.on("delete-editor", (_, { title }) => {
   const editor = state.openEditors.find(e => e.noteTitle === title);
   if (editor) {
-    editor.close();
+    editor.editorWindow.close();
     state.openEditors = state.openEditors.filter(e => e.noteTitle !== title);
   }
 });
