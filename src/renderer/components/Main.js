@@ -45,6 +45,7 @@ const BodyWrapper = styled.div`
 
 const Search = styled.input`
   flex: 1;
+  align-items: center;
   height: 60px;
   margin: 0px;
   padding: 5px;
@@ -70,20 +71,34 @@ const UndoContainer = styled.div`
 `;
 
 const AddNote = styled.button`
-  display: block;
-  height: 55px;
-  width: 55px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 50px;
+  width: auto;
   border: none;
-  border-radius: 3px;
-  margin: 0;
+  border-radius: 5px;
+  margin: 5px;
   padding: 5px;
-  background-color: lightgoldenrodyellow;
-  font-size: 35px;
+  padding-left: 7px;
+  padding-right: 7px;
+  background-color: transparent;
+  font-size: 25px;
 
   &:hover {
     cursor: pointer;
-    background-color: lightblue;
+    color: ${({ theme }) => theme.buttonTextColor};
+    background-color: ${({ theme }) => theme.hoverColor};
   }
+  &:before {
+    content: "⏎";
+  }
+
+  &:hover:before {
+    font-size: 12px;
+    content: "CREATE";
+  }
+
   &:focus {
     ${focusStyles};
   }
@@ -410,9 +425,7 @@ class Main extends Component {
                       this.openNote(searchValue)
                     )
                   }
-                >
-                  +
-                </AddNote>
+                />
               )}
           </TopBarWrapper>
         </TopAbsoluteWrapper>

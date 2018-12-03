@@ -15,7 +15,7 @@ const StyledNote = styled.div`
 
   &:hover {
     cursor: pointer;
-    background-color: #f3f3f3;
+    background-color: ${({ theme }) => theme.hoverColor};
   }
 
   &:first-of-type {
@@ -75,7 +75,7 @@ const Option = styled.div`
   &:last-of-type {
     border-top-right-radius: 5px;
     &:hover {
-      color: red;
+      color: ${({ theme }) => theme.deleteColor};
     }
   }
 `;
