@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import styled, { css } from "styled-components";
+import styled, { css, injectGlobal } from "styled-components";
 import { focusStyles } from "../../style";
 import Date from "./Date";
 
@@ -100,6 +100,12 @@ const RenamingInput = styled.input`
   }
 `;
 
+injectGlobal`
+  :not(${RenamingInput}) {
+    pointer-events: var(--pointer-events);
+  }
+`;
+
 class Note extends Component {
   state = {
     isHovered: false,
@@ -116,6 +122,12 @@ class Note extends Component {
       ...props
     } = this.props;
     const { isBeingRenamed, isHovered } = this.state;
+
+    if (isBeingRenamed) {
+      document.documentElement.style.setProperty("--pointer-events", "none");
+    } else {
+      document.documentElement.style.setProperty("--pointer-events", "inherit");
+    }
     return (
       <StyledNote // eslint-disable-line
         onMouseOver={() => this.setState({ isHovered: true })}
