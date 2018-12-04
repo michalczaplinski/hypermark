@@ -15,6 +15,7 @@ files:
 
 publish:
   provider: github
+  releaseType: release
 
 dmg:
   contents:
