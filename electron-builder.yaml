@@ -13,6 +13,9 @@ files:
   - package.json
   - node_modules/
 
+publish:
+  provider: github
+
 dmg:
   contents:
     - type: link
