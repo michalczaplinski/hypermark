@@ -1,7 +1,8 @@
-import { app, BrowserWindow, ipcMain, globalShortcut } from "electron"; //eslint-disable-line
+import { app, BrowserWindow, ipcMain, globalShortcut, ipcRenderer } from "electron"; //eslint-disable-line
 import Joi from "joi";
 import { format as formatUrl } from "url";
 import path from "path";
+import Store from "electron-store";
 
 import { validateObject } from "../util";
 import MainMenuBuilder from "../menu";
@@ -163,6 +164,14 @@ if (!gotTheLock) {
     let menuBuilder = new MainMenuBuilder(state.mainWindow);
     menuBuilder.buildMenu();
 
+    const store = new Store();
+    if (!store.has("path")) {
+      const directoryPath = app.getPath("userData");
+      store.set("path", directoryPath);
+    }
+    const directoryPath = store.get("path");
+    state.mainWindow.webContents.send("ready", { directoryPath });
+
     const ret = globalShortcut.register("CommandOrControl+Shift+L", () => {
       if (!state.mainWindow) {
         state.mainWindow = createMainWindow();
@@ -255,4 +264,10 @@ ipcMain.on("search-input-change", (_, { searchListLength }) => {
   height = searchListLength === 0 ? height : height + 5;
 
   state.mainWindow.setContentSize(width, height, true);
+});
+
+ipcMain.on("update-directory-path", ({ directoryPath }) => {
+  const store = new Store();
+  store.set("path", directoryPath);
+  state.mainWindow.webContents.send("update-directory-path", { directoryPath });
 });

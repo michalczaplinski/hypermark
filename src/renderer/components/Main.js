@@ -12,7 +12,6 @@ import Note from "./Note";
 import UndoButton from "./UndoButton";
 import undoStack from "../undoStack";
 import { focusStyles } from "../../style";
-import globalState from "../../globals";
 
 const asyncReadFile = promisify(fs.readFile);
 const asyncReaddir = promisify(fs.readdir);
@@ -168,11 +167,11 @@ class Main extends Component {
   scanForNotes = async () => {
     const { searchValue } = this.state;
     try {
-      const files = await asyncReaddir(globalState.directoryPath);
+      const files = await asyncReaddir(this.props.directoryPath);
       const promiseOfFiles = files
         .filter(noteFileName => path.extname(noteFileName) === ".md")
         .map(noteFileName =>
-          asyncStat(path.join(globalState.directoryPath, noteFileName))
+          asyncStat(path.join(this.props.directoryPath, noteFileName))
             .then(stats => ({
               noteName: noteFileName.replace(/\.md$/, ""),
               noteFileName,
@@ -223,7 +222,7 @@ class Main extends Component {
   hasValue = async (searchValue, noteFileName) => {
     try {
       const noteContents = await asyncReadFile(
-        path.join(globalState.directoryPath, noteFileName),
+        path.join(this.props.directoryPath, noteFileName),
         "utf8"
       );
       const valueRegex = new RegExp(searchValue, "i");
@@ -266,7 +265,7 @@ class Main extends Component {
     }
 
     return asyncWriteFile(
-      path.join(globalState.directoryPath, `${noteName}.md`),
+      path.join(this.props.directoryPath, `${noteName}.md`),
       contents,
       { flag: "wx+" }
     )
@@ -286,7 +285,7 @@ class Main extends Component {
 
   deleteNote = async noteName => {
     const noteFileName = `${noteName}.md`;
-    const location = path.join(globalState.directoryPath, noteFileName);
+    const location = path.join(this.props.directoryPath, noteFileName);
     const noteContents = await asyncReadFile(location, "utf8");
 
     undoStack.push(() => this.createNewNote(noteName, noteContents));
@@ -307,7 +306,7 @@ class Main extends Component {
 
   openNote = async noteName => {
     const noteFileName = `${noteName}.md`;
-    const location = path.join(globalState.directoryPath, noteFileName);
+    const location = path.join(this.props.directoryPath, noteFileName);
     const noteContents = await asyncReadFile(location, "utf8");
     ipcRenderer.send("open-editor", {
       noteContents,
@@ -317,7 +316,7 @@ class Main extends Component {
   };
 
   renameNote = (oldName, newName) => {
-    const { directoryPath } = globalState;
+    const { directoryPath } = this.props;
     try {
       fs.accessSync(`${newName}.md`);
       console.error(`File ${newName} already Exists!`);

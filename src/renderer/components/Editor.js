@@ -9,8 +9,6 @@ import "codemirror/addon/fold/foldgutter.css";
 import "../hypermd/mode/hypermd.css";
 import "../hypermd/theme/hypermd-light.css";
 
-import globalState from "../../globals";
-
 const hyperMD = require("ultramd");
 
 export default class Editor extends Component {
@@ -48,7 +46,7 @@ export default class Editor extends Component {
 
   saveNote = data => {
     const { noteFileName } = this.state;
-    const location = `${globalState.directoryPath}/${noteFileName}`;
+    const location = `${this.props.directoryPath}/${noteFileName}`;
     fs.writeFile(location, data, err => {
       if (err) {
         throw err;

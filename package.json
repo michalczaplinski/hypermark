@@ -16,8 +16,8 @@
   },
   "dependencies": {
     "codemirror": "^5.39.0",
-    "electron-first-run": "^2.0.0",
     "electron-is-dev": "^0.3.0",
+    "electron-store": "^2.0.0",
     "joi": "^13.4.0",
     "lodash": "^4.17.10",
     "moment": "^2.22.2",

@@ -7,13 +7,13 @@ branches:
   only: 
     - master
 
-deploy:
-  provider: releases
-  api_key: $GH_TOKEN
-  file: $HOME/dist
-  skip_cleanup: true
-  on:
-    tags: true
+# deploy:
+#   provider: releases
+#   api_key: $GH_TOKEN
+#   file: $HOME/dist
+#   skip_cleanup: true
+#   on:
+#     tags: true
 
 
 language: node_js
