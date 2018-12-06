@@ -7,6 +7,7 @@ import fs from "fs";
 import { promisify } from "util";
 import { validateObject } from "../util";
 import MainMenuBuilder from "../menu";
+import { is } from "electron-util";
 
 const { COPYFILE_EXCL } = fs.constants;
 
@@ -173,9 +174,15 @@ if (!gotTheLock) {
   });
 
   app.on("ready", () => {
+    let separator = "";
+    if (is.macos) {
+      separator = "..";
+    }
+
     asyncCopyFile(
       path.join(
         path.dirname(app.getAppPath()),
+        separator,
         `../static/👉 Read This First 👈.md`
       ),
       path.join(app.getPath("userData"), "👉 Read This First 👈.md"),
