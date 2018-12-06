@@ -5,7 +5,6 @@ import { ThemeProvider } from "styled-components";
 import Store from "electron-store";
 import Main from "./components/Main";
 import Editor from "./components/Editor";
-import Preferences from "./components/Preferences";
 
 import "./../style/index.css";
 
