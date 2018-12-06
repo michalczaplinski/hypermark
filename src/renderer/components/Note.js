@@ -4,6 +4,7 @@ import { focusStyles } from "../../style";
 import Date from "./Date";
 
 const StyledNote = styled.div`
+  -webkit-user-select: none;
   position: relative;
   display: block;
   height: 60px;
@@ -81,6 +82,7 @@ const Option = styled.div`
 `;
 
 const RenamingInput = styled.input`
+  -webkit-user-select: text;
   font-size: 21px;
   width: 370px;
   height: 25px;
@@ -98,6 +100,8 @@ const RenamingInput = styled.input`
   &:focus {
     outline-offset: 0px;
   }
+
+  pointer-events: auto;
 `;
 
 injectGlobal`
@@ -126,7 +130,7 @@ class Note extends Component {
     if (isBeingRenamed) {
       document.documentElement.style.setProperty("--pointer-events", "none");
     } else {
-      document.documentElement.style.setProperty("--pointer-events", "inherit");
+      document.documentElement.style.setProperty("--pointer-events", "auto");
     }
     return (
       <StyledNote // eslint-disable-line

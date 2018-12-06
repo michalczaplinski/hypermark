@@ -3,12 +3,14 @@ import styled from "styled-components";
 import moment from "moment";
 
 const StyledDate = styled.div`
+  -webkit-user-select: none;
   font-size: 12px;
   font-weight: 600;
   font-style: italic;
 `;
 
 const DateContainer = styled.div`
+  -webkit-user-select: none;
   display: flex;
 `;
 

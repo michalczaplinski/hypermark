@@ -33,16 +33,19 @@ const TopAbsoluteWrapper = styled.div`
 `;
 
 const TopBarWrapper = styled.div`
+  -webkit-user-select: none;
   display: flex;
   flex-flow: row nowrap;
 `;
 
 const BodyWrapper = styled.div`
+  -webkit-user-select: none;
   margin-top: 65px;
   overflow: scroll;
 `;
 
 const Search = styled.input`
+  -webkit-user-select: text;
   flex: 1;
   align-items: center;
   height: 60px;
@@ -60,6 +63,7 @@ const Search = styled.input`
 
   &::placeholder {
     color: #cccccc;
+    -webkit-user-select: none;
   }
 `;
 
