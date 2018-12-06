@@ -1,11 +1,16 @@
 import { app, BrowserWindow, ipcMain, globalShortcut, ipcRenderer } from "electron"; //eslint-disable-line
 import Joi from "joi";
 import { format as formatUrl } from "url";
-import path from "path";
 import Store from "electron-store";
-
+import path from "path";
+import fs from "fs";
+import { promisify } from "util";
 import { validateObject } from "../util";
 import MainMenuBuilder from "../menu";
+
+const { COPYFILE_EXCL } = fs.constants;
+
+const asyncCopyFile = promisify(fs.copyFile);
 
 const state = {
   mainWindow: undefined,
@@ -168,6 +173,19 @@ if (!gotTheLock) {
   });
 
   app.on("ready", () => {
+    asyncCopyFile(
+      path.join(
+        path.dirname(app.getAppPath()),
+        `../static/👉 Read This First 👈.md`
+      ),
+      path.join(app.getPath("userData"), "👉 Read This First 👈.md"),
+      COPYFILE_EXCL
+    ).catch(err => {
+      if (err) {
+        console.error(err);
+      }
+    });
+
     state.mainWindow = createMainWindow();
     let menuBuilder = new MainMenuBuilder(state.mainWindow);
     menuBuilder.buildMenu();

@@ -11,7 +11,10 @@ asar: true
 
 files:
   - package.json
-
+  
+extraFiles: 
+  - static/👉 Read This First 👈.md
+  
 publish:
   provider: github
   releaseType: release
