@@ -67,6 +67,9 @@ function createMainWindow() {
   const directoryPath = store.get("path");
   window.webContents.send("ready", { directoryPath });
 
+  const menuBuilder = new MainMenuBuilder(state.mainWindow);
+  menuBuilder.buildMenu();
+
   return window;
 }
 
@@ -169,13 +172,9 @@ if (!gotTheLock) {
 
   app.on("ready", () => {
     state.mainWindow = createMainWindow();
-    let menuBuilder = new MainMenuBuilder(state.mainWindow);
-    menuBuilder.buildMenu();
     const ret = globalShortcut.register("CommandOrControl+Shift+L", () => {
       if (!state.mainWindow) {
         state.mainWindow = createMainWindow();
-        menuBuilder = new MainMenuBuilder(state.mainWindow);
-        menuBuilder.buildMenu();
       } else if (
         state.mainWindow.isVisible() &&
         !state.mainWindow.isFocused()
