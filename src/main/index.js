@@ -67,7 +67,7 @@ function createMainWindow() {
 
   const store = new Store();
   if (!store.has("path")) {
-    const directoryPath = app.getPath("userData");
+    const directoryPath = path.join(app.getPath("userData"), "notes");
     store.set("path", directoryPath);
   }
   const directoryPath = store.get("path");
@@ -174,6 +174,11 @@ if (!gotTheLock) {
   });
 
   app.on("ready", () => {
+    const pathToNotes = path.join(app.getPath("userData"), "notes");
+    if (!fs.existsSync(pathToNotes)) {
+      fs.mkdirSync(pathToNotes);
+    }
+
     let separator = "";
     if (is.macos) {
       separator = "..";
@@ -183,9 +188,9 @@ if (!gotTheLock) {
       path.join(
         path.dirname(app.getAppPath()),
         separator,
-        `../static/👉 Read This First 👈.md`
+        `static/👉 Read This First 👈.md`
       ),
-      path.join(app.getPath("userData"), "👉 Read This First 👈.md"),
+      path.join(pathToNotes, "👉 Read This First 👈.md"),
       COPYFILE_EXCL
     ).catch(err => {
       if (err) {
