@@ -11,13 +11,13 @@ asar: true
 
 files:
   - package.json
-  - node_modules/
 
 publish:
   provider: github
   releaseType: release
 
 dmg:
+  backgroundColor: #ffffff
   contents:
     - type: link
       path: /Applications
