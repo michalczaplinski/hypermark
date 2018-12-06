@@ -59,6 +59,14 @@ function createMainWindow() {
     });
   });
 
+  const store = new Store();
+  if (!store.has("path")) {
+    const directoryPath = app.getPath("userData");
+    store.set("path", directoryPath);
+  }
+  const directoryPath = store.get("path");
+  window.webContents.send("ready", { directoryPath });
+
   return window;
 }
 
@@ -163,15 +171,6 @@ if (!gotTheLock) {
     state.mainWindow = createMainWindow();
     let menuBuilder = new MainMenuBuilder(state.mainWindow);
     menuBuilder.buildMenu();
-
-    const store = new Store();
-    if (!store.has("path")) {
-      const directoryPath = app.getPath("userData");
-      store.set("path", directoryPath);
-    }
-    const directoryPath = store.get("path");
-    state.mainWindow.webContents.send("ready", { directoryPath });
-
     const ret = globalShortcut.register("CommandOrControl+Shift+L", () => {
       if (!state.mainWindow) {
         state.mainWindow = createMainWindow();
