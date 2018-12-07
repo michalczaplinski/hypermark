@@ -89,7 +89,6 @@ const OpenPreferences = styled.div`
 
   &:hover {
     cursor: pointer;
-    background-color: ${({ theme }) => theme.hoverColor};
   }
 `;
 
