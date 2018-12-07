@@ -19,4 +19,10 @@ function validateObject(value, schema) {
   assert.equal(error, null);
 }
 
-export { asyncFilter, validateObject };
+function makeArray(start, end) {
+  return Array(end - start)
+    .fill()
+    .map((e, i) => i + start);
+}
+
+export { asyncFilter, validateObject, makeArray };
