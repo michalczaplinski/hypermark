@@ -1,10 +1,9 @@
 import React from "react";
-import PropTypes from "prop-types";
-import styled from "styled-components";
 import { remote, ipcRenderer } from "electron"; // eslint-disable-line
 
-const Preferences = ({ directoryPath }) => (
+const Preferences = ({ directoryPath, closePreferences }) => (
   <div>
+    <button onClick={closePreferences}> close </button>
     <input disabled value={directoryPath} />
     <button
       onClick={() => {
@@ -15,6 +14,7 @@ const Preferences = ({ directoryPath }) => (
             properties: ["openDirectory"]
           },
           paths => {
+            console.log(paths);
             ipcRenderer.send("update-directory-path", {
               directoryPath: paths[0]
             });

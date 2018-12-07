@@ -295,7 +295,7 @@ ipcMain.on("search-input-change", (_, { searchListLength }) => {
   state.mainWindow.setContentSize(width, height, true);
 });
 
-ipcMain.on("update-directory-path", ({ directoryPath }) => {
+ipcMain.on("update-directory-path", (_, { directoryPath }) => {
   const store = new Store();
   store.set("path", directoryPath);
   state.mainWindow.webContents.send("update-directory-path", { directoryPath });

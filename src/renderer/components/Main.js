@@ -33,6 +33,7 @@ const TopAbsoluteWrapper = styled.div`
 `;
 
 const TopBarWrapper = styled.div`
+  position: relative;
   -webkit-user-select: none;
   display: flex;
   flex-flow: row nowrap;
@@ -64,6 +65,27 @@ const Search = styled.input`
   &::placeholder {
     color: #cccccc;
     -webkit-user-select: none;
+  }
+`;
+
+const OpenPreferences = styled.div`
+  pointer-events: visible;
+  position: absolute;
+  top: 0;
+  right: 0;
+  font-size: 16px;
+  padding-left: 5px;
+  height: 21px;
+  width: 21px;
+
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  &:hover {
+    cursor: pointer;
+    background: ${({ theme }) => theme.hoverColor};
   }
 `;
 
@@ -357,6 +379,8 @@ class Main extends Component {
   }
 
   render() {
+    const { openPreferences } = this.props;
+
     const {
       currentSearchNotes,
       searchValue,
@@ -388,6 +412,10 @@ class Main extends Component {
                   }}
                 />
               </UndoContainer>
+            )}
+
+            {searchValue === "" && (
+              <OpenPreferences onClick={openPreferences}>⚙️</OpenPreferences> //eslint-disable-line
             )}
 
             <Search
