@@ -20,6 +20,10 @@ const asyncRmFile = promisify(fs.unlink);
 const asyncWriteFile = promisify(fs.writeFile);
 const asyncRename = promisify(fs.rename);
 
+const Container = styled.div`
+  overflow: hidden;
+`;
+
 const TopAbsoluteWrapper = styled.div`
   position: fixed;
   top: 0;
@@ -85,7 +89,7 @@ const OpenPreferences = styled.div`
 
   &:hover {
     cursor: pointer;
-    background: ${({ theme }) => theme.hoverColor};
+    background-color: ${({ theme }) => theme.hoverColor};
   }
 `;
 
@@ -396,7 +400,7 @@ class Main extends Component {
     );
 
     return (
-      <div style={{ overflow: "hidden" }}>
+      <Container>
         <TopAbsoluteWrapper>
           <TopBarWrapper>
             {undoVisible && (
@@ -482,7 +486,7 @@ class Main extends Component {
             />
           ))}
         </BodyWrapper>
-      </div>
+      </Container>
     );
   }
 }

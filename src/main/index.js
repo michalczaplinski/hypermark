@@ -5,9 +5,9 @@ import Store from "electron-store";
 import path from "path";
 import fs from "fs";
 import { promisify } from "util";
+import { is } from "electron-util";
 import { validateObject } from "../util";
 import MainMenuBuilder from "../menu";
-import { is } from "electron-util";
 
 const { COPYFILE_EXCL } = fs.constants;
 

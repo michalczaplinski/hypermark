@@ -41,10 +41,12 @@ class App extends React.Component {
 
     if (showPreferences) {
       return (
-        <Preferences
-          directoryPath={directoryPath}
-          closePreferences={this.closePreferences}
-        />
+        <ThemeProvider theme={theme}>
+          <Preferences
+            directoryPath={directoryPath}
+            closePreferences={this.closePreferences}
+          />
+        </ThemeProvider>
       );
     }
 
