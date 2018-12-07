@@ -66,12 +66,17 @@ function createMainWindow() {
   });
 
   const store = new Store();
+  // here we set the Preferences !!!
   if (!store.has("path")) {
     const directoryPath = path.join(app.getPath("userData"), "notes");
     store.set("path", directoryPath);
   }
-  const directoryPath = store.get("path");
-  window.webContents.send("ready", { directoryPath });
+  if (!store.has("fontSize")) {
+    store.set("fontSize", 14);
+  }
+  if (!store.has("shortcut")) {
+    store.set("shortcut", "CommandOrControl+Shift+L");
+  }
 
   return window;
 }
