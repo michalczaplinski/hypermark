@@ -65,20 +65,26 @@ function createMainWindow() {
     });
   });
 
-  const store = new Store();
-  // here we set the Preferences !!!
-  if (!store.has("path")) {
-    const directoryPath = path.join(app.getPath("userData"), "notes");
-    store.set("path", directoryPath);
-  }
-  if (!store.has("fontSize")) {
-    store.set("fontSize", 14);
-  }
-  if (!store.has("shortcut")) {
-    store.set("shortcut", "CommandOrControl+Shift+L");
-  }
-
   return window;
+}
+
+function registerGlobalShortcut(shortcut) {
+  const ret = globalShortcut.register(shortcut, () => {
+    if (!state.mainWindow) {
+      state.mainWindow = createMainWindow();
+      const menuBuilder = new MainMenuBuilder(state.mainWindow);
+      menuBuilder.buildMenu();
+    } else if (state.mainWindow.isVisible() && !state.mainWindow.isFocused()) {
+      state.mainWindow.focus();
+    } else if (state.mainWindow.isVisible() && state.mainWindow.isFocused()) {
+      state.mainWindow.hide();
+    } else {
+      state.mainWindow.show();
+      state.mainWindow.focus();
+    }
+  });
+
+  return ret;
 }
 
 function createEditorWindow(title) {
@@ -203,36 +209,29 @@ if (!gotTheLock) {
       }
     });
 
-    state.mainWindow = createMainWindow();
-    let menuBuilder = new MainMenuBuilder(state.mainWindow);
-    menuBuilder.buildMenu();
-    const ret = globalShortcut.register("CommandOrControl+Shift+L", () => {
-      if (!state.mainWindow) {
-        state.mainWindow = createMainWindow();
-        menuBuilder = new MainMenuBuilder(state.mainWindow);
-        menuBuilder.buildMenu();
-      } else if (
-        state.mainWindow.isVisible() &&
-        !state.mainWindow.isFocused()
-      ) {
-        state.mainWindow.focus();
-      } else if (state.mainWindow.isVisible() && state.mainWindow.isFocused()) {
-        state.mainWindow.hide();
-      } else {
-        state.mainWindow.show();
-        state.mainWindow.focus();
-      }
-    });
-
-    if (!ret) {
-      console.error("registration failed");
+    // Here we set the initial preferences !!!
+    const store = new Store();
+    if (!store.has("path")) {
+      const directoryPath = path.join(app.getPath("userData"), "notes");
+      store.set("path", directoryPath);
     }
+    if (!store.has("fontSize")) {
+      store.set("fontSize", 14);
+    }
+    if (!store.has("shortcut")) {
+      store.set("shortcut", "CommandOrControl+Shift+L");
+    }
+
+    state.mainWindow = createMainWindow();
+    const menuBuilder = new MainMenuBuilder(state.mainWindow);
+    menuBuilder.buildMenu();
+
+    const shortcut = store.get("shortcut");
+    registerGlobalShortcut(shortcut);
   });
 }
 
 app.on("will-quit", () => {
-  globalShortcut.unregister("CommandOrControl+Shift+L");
-  globalShortcut.unregister("CommandOrControl+Shift+Z");
   globalShortcut.unregisterAll();
 });
 
@@ -300,8 +299,19 @@ ipcMain.on("search-input-change", (_, { searchListLength }) => {
   state.mainWindow.setContentSize(width, height, true);
 });
 
-ipcMain.on("update-directory-path", (_, { directoryPath }) => {
-  const store = new Store();
-  store.set("path", directoryPath);
-  state.mainWindow.webContents.send("update-directory-path", { directoryPath });
+ipcMain.on("update-shortcut", (event, { shortcut }) => {
+  try {
+    globalShortcut.unregisterAll();
+    const ret = registerGlobalShortcut(shortcut);
+    if (!ret) {
+      state.mainWindow.webContents.send("update-shortcut-failure", true);
+      return;
+    }
+
+    const store = new Store();
+    store.set("shortcut", shortcut);
+    state.mainWindow.webContents.send("update-shortcut-success", { shortcut });
+  } catch (e) {
+    state.mainWindow.webContents.send("update-shortcut-failure", true);
+  }
 });

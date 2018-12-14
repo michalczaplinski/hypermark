@@ -187,14 +187,13 @@ class Main extends Component {
       this.scanForNotes();
     });
 
-    // not sure if I need the "current"
     if (this.input.current) {
       this.input.current.focus();
     }
   }
 
   componentWillUnmount() {
-    ipcRenderer.removeAllListeners();
+    ipcRenderer.removeAllListeners("focus");
   }
 
   scanForNotes = async () => {

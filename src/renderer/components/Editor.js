@@ -38,6 +38,22 @@ export default class Editor extends Component {
       const newValue = cm.getDoc().getValue();
       this.update(newValue);
     });
+
+    document.getElementsByClassName("CodeMirror").item(0).style = `font-size: ${
+      this.props.fontSize
+    }px`;
+
+    this.editor = editor;
+  }
+
+  componentDidUpdate() {
+    document.getElementsByClassName("CodeMirror").item(0).style = `font-size: ${
+      this.props.fontSize
+    }px`;
+  }
+
+  componentWillUnmount() {
+    this.editor.off("change");
   }
 
   update = debounce(newValue => {

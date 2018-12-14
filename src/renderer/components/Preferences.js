@@ -1,6 +1,14 @@
 import React from "react";
 import styled from "styled-components";
-import { remote, ipcRenderer } from "electron"; // eslint-disable-line
+import { remote } from "electron"; // eslint-disable-line
+import Mstrp from "mousetrap";
+import "mousetrap-global-bind";
+import record from "mousetrap-record";
+
+import Dots from "./Dots";
+import { makeArray } from "../../util";
+
+const Mousetrap = record(Mstrp);
 
 const Container = styled.div`
   -webkit-user-select: none;
@@ -35,7 +43,6 @@ const CloseButton = styled.button`
 
 const ContentContainer = styled.div`
   width: 90vw;
-  padding-top: 12px;
   padding-left: 12px;
   display: flex;
   flex-flow: column nowrap;
@@ -45,13 +52,13 @@ const ContentContainer = styled.div`
 
 const Heading = styled.h3`
   font-weight: bold;
-  margin-top: 4px;
+  margin-top: 17px;
   margin-bottom: 4px;
 `;
 
 const Text = styled.p`
   font-size: 13px;
-  margin-top: 4px;
+  margin-top: 0;
   margin-bottom: 4px;
   color: #505050;
 `;
@@ -61,8 +68,10 @@ const DirectoryPathContainer = styled.div`
   width: 90%;
 `;
 
-const DirectoryPath = styled.div`
+const DisabledInput = styled.div`
   font-size: 14px;
+  min-height: 31px;
+  min-width: 43px;
   background-color: ${({ theme }) => theme.hoverColor};
   color: #505050;
   padding: 7px;
@@ -73,39 +82,91 @@ const DirectoryPath = styled.div`
   margin-bottom: 6px;
 `;
 
-const Preferences = ({ directoryPath, closePreferences }) => (
-  <Container>
-    <CloseButton onClick={closePreferences}> Ｘ </CloseButton>
-    <ContentContainer>
-      <Heading> Notes location </Heading>
-      <Text>
-        FYI: If you change it, your notes won't be copied to the new location.
-        You need to do it yourself!
-      </Text>
-      <DirectoryPathContainer>
-        <DirectoryPath>{directoryPath} </DirectoryPath>
-      </DirectoryPathContainer>
-      <button
-        onClick={() => {
-          remote.dialog.showOpenDialog(
-            {
-              title: "Choose directory",
-              defaultPath: directoryPath,
-              properties: ["openDirectory"]
-            },
-            paths => {
-              console.log(paths);
-              ipcRenderer.send("update-directory-path", {
-                directoryPath: paths[0]
-              });
-            }
-          );
-        }}
-      >
-        Change...
-      </button>
-    </ContentContainer>
-  </Container>
-);
+class Preferences extends React.Component {
+  state = {
+    recordingKeys: false
+  };
+
+  render() {
+    const {
+      closePreferences,
+      directoryPath,
+      fontSize,
+      shortcut,
+      updateShortcut,
+      updateFontSize,
+      updateDirectoryPath
+    } = this.props;
+
+    const { recordingKeys } = this.state;
+
+    return (
+      <Container>
+        <CloseButton onClick={closePreferences}> Ｘ </CloseButton>
+        <ContentContainer>
+          <Heading> Notes location </Heading>
+          <Text>
+            FYI: If you change it, your notes won't be copied to the new
+            location. You need to do it yourself!
+          </Text>
+          <DirectoryPathContainer>
+            <DisabledInput>{directoryPath} </DisabledInput>
+          </DirectoryPathContainer>
+          <button
+            onClick={() => {
+              remote.dialog.showOpenDialog(
+                {
+                  title: "Choose directory",
+                  defaultPath: directoryPath,
+                  properties: ["openDirectory"]
+                },
+                path => updateDirectoryPath(path[0])
+              );
+            }}
+          >
+            Change...
+          </button>
+          <Heading>Font size</Heading>
+          <select
+            onChange={e => {
+              updateFontSize(e.target.value);
+            }}
+            value={fontSize}
+          >
+            {makeArray(11, 22).map(value => (
+              <option key={value} value={value}>
+                {value}
+              </option>
+            ))}
+          </select>
+          <Heading>Global shortcut </Heading>
+          <Text>This shortcut will open the app from anywhere</Text>
+          <DisabledInput> {recordingKeys ? <Dots /> : shortcut} </DisabledInput>
+          {!recordingKeys && (
+            <button
+              onClick={() => {
+                this.setState({ recordingKeys: true });
+
+                Mousetrap.record(s => {
+                  const seq = s[0].split("+");
+                  const sequence = seq.map(word => {
+                    if (word === "meta") {
+                      return "CmdOrCtrl";
+                    }
+                    return word.slice(0, 1).toUpperCase() + word.slice(1);
+                  });
+                  updateShortcut(sequence.join("+"));
+                  this.setState({ recordingKeys: false });
+                }, 50);
+              }}
+            >
+              Record...
+            </button>
+          )}
+        </ContentContainer>
+      </Container>
+    );
+  }
+}
 
 export default Preferences;
