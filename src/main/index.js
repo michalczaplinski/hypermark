@@ -31,7 +31,8 @@ function createMainWindow() {
     maxHeight: SEARCHBAR_HEIGHT + ITEM_HEIGHT * 6 + 5,
     frame: false,
     fullscreenable: false,
-    disableAutoHideCursor: true
+    disableAutoHideCursor: true,
+    show: false
   });
 
   if (isDevelopment || process.env.DEBUG_PROD === "true") {
@@ -52,6 +53,11 @@ function createMainWindow() {
 
   window.on("closed", () => {
     state.mainWindow = null;
+  });
+
+  window.on("ready-to-show", () => {
+    state.mainWindow.show();
+    state.mainWindow.focus();
   });
 
   window.on("focus", () => {
