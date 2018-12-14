@@ -9,6 +9,8 @@ import { is } from "electron-util";
 import { validateObject } from "../util";
 import MainMenuBuilder from "../menu";
 
+require("electron-context-menu")();
+
 const { COPYFILE_EXCL } = fs.constants;
 
 const asyncCopyFile = promisify(fs.copyFile);

@@ -16,6 +16,7 @@
   },
   "dependencies": {
     "codemirror": "^5.39.0",
+    "electron-context-menu": "^0.10.1",
     "electron-is-dev": "^0.3.0",
     "electron-store": "^2.0.0",
     "electron-util": "^0.10.2",
