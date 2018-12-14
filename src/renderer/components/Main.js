@@ -193,6 +193,10 @@ class Main extends Component {
     }
   }
 
+  componentWillUnmount() {
+    ipcRenderer.removeAllListeners();
+  }
+
   scanForNotes = async () => {
     const { searchValue } = this.state;
     try {
