@@ -97,6 +97,7 @@ const UndoContainer = styled.div`
   position: absolute;
   top: 5px;
   right: 5px;
+  z-index: 100;
 `;
 
 const AddNote = styled.button`

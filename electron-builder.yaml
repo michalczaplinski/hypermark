@@ -20,7 +20,7 @@ publish:
   releaseType: release
 
 dmg:
-  backgroundColor: #ffffff
+  backgroundColor: #d7f0ff
   contents:
     - type: link
       path: /Applications
