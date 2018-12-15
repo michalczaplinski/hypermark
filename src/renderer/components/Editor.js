@@ -33,6 +33,7 @@ export default class Editor extends Component {
       gutters: [],
       foldGutters: false
     });
+    editor.focus();
 
     editor.on("change", cm => {
       const newValue = cm.getDoc().getValue();
