@@ -10,8 +10,7 @@ Boom! We can format text using only keyboard characters and hypermark automatica
 
 This is just scratching the surface. With markdown you can make lists, blockquotes, or code blocks and much more easily. If you want to learn more about the format go to [https://commonmark.org/help/](https://commonmark.org/help/)
 
-PS. If you wonder how I made text `look like this` just surround any text with backticks (the "\`" character)
-
+PS. If you wonder how I made text `look like this` just surround any text with backticks (the "\`" character).
 
 ### Shortcuts
 - **⌘/ctrl + shift + l**                  global show/hide window (works even outside the app)
