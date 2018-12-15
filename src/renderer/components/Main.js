@@ -22,6 +22,7 @@ const asyncRename = promisify(fs.rename);
 
 const Container = styled.div`
   overflow: hidden;
+  padding: 5px;
 `;
 
 const TopAbsoluteWrapper = styled.div`

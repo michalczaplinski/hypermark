@@ -123,10 +123,9 @@ function createEditorWindow(title) {
   const window = new BrowserWindow({
     x,
     y,
-    width: 420,
-    height: 520,
+    width: 565,
+    height: 480,
     minWidth: 200,
-    // webPreferences: { webSecurity: false },
     title
   });
 
