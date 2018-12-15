@@ -28,13 +28,14 @@ const isDevelopment = process.env.NODE_ENV !== "production";
 
 function createMainWindow() {
   const window = new BrowserWindow({
-    width: 400,
+    width: 420,
     height: SEARCHBAR_HEIGHT + ITEM_HEIGHT * 5 + 5,
     maxHeight: SEARCHBAR_HEIGHT + ITEM_HEIGHT * 6 + 5,
     frame: false,
     fullscreenable: false,
     disableAutoHideCursor: true,
-    show: false
+    show: false,
+    resizable: false
   });
 
   if (isDevelopment || process.env.DEBUG_PROD === "true") {
@@ -125,7 +126,7 @@ function createEditorWindow(title) {
     width: 420,
     height: 520,
     minWidth: 200,
-    webPreferences: { webSecurity: false },
+    // webPreferences: { webSecurity: false },
     title
   });
 
@@ -301,6 +302,7 @@ ipcMain.on("delete-editor", (_, { title }) => {
 ipcMain.on("search-input-change", (_, { searchListLength }) => {
   const [width] = state.mainWindow.getContentSize();
   let height = SEARCHBAR_HEIGHT + ITEM_HEIGHT * searchListLength;
+  state.searchListLength = searchListLength;
   // the 5 is for the bottom edge
   height = searchListLength === 0 ? height : height + 5;
 
@@ -322,4 +324,23 @@ ipcMain.on("update-shortcut", (event, { shortcut }) => {
   } catch (e) {
     state.mainWindow.webContents.send("update-shortcut-failure", true);
   }
+});
+
+ipcMain.on("preferences-open", () => {
+  const [_, height] = state.mainWindow.getContentSize();
+
+  if (height < 375) {
+    state.mainWindow.setContentSize(420, 375, true);
+  }
+});
+
+ipcMain.on("preferences-closed", () => {
+  const { searchListLength } = state;
+
+  // TODO: this is copied from the `search-input-change` listener. Unify the implementation
+  let height = SEARCHBAR_HEIGHT + ITEM_HEIGHT * searchListLength;
+
+  // the 5 is for the bottom edge
+  height = searchListLength === 0 ? height : height + 5;
+  state.mainWindow.setContentSize(420, height, true);
 });

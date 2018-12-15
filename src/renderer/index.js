@@ -64,8 +64,15 @@ class App extends React.Component {
     this.setState({ fontSize });
   };
 
-  openPreferences = () => this.setState({ showPreferences: true });
-  closePreferences = () => this.setState({ showPreferences: false });
+  openPreferences = () => {
+    this.setState({ showPreferences: true });
+    ipcRenderer.send("preferences-open", true);
+  };
+
+  closePreferences = () => {
+    this.setState({ showPreferences: false });
+    ipcRenderer.send("preferences-closed", false);
+  };
 
   render() {
     const { directoryPath, shortcut, fontSize, showPreferences } = this.state;
