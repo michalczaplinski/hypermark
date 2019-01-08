@@ -116,6 +116,17 @@ class Note extends Component {
     isBeingRenamed: false
   };
 
+  componentDidMount() {
+    const { isBeingRenamed } = this.state;
+    window.addEventListener("keyup", e => {
+      if (e.key === "Escape") {
+        this.setState({ isBeingRenamed: false });
+        e.preventDefault();
+        e.stopPropagation();
+      }
+    });
+  }
+
   render() {
     const {
       note: { lastModified, noteName },

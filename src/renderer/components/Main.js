@@ -155,9 +155,6 @@ class Main extends Component {
   }
 
   componentDidMount() {
-    Mousetrap.bindGlobal("esc", () => {
-      this.mainWindow.hide();
-    });
     Mousetrap.bindGlobal(["command+z"], () => {
       undoStack.undo();
     });
@@ -449,6 +446,9 @@ class Main extends Component {
                 }
                 if (e.key === "Enter" && notes.length > 0) {
                   this.openNote(notes[0].noteName);
+                }
+                if (e.key === "Backspace" && notes.length > 0) {
+                  this.deleteNote(notes[0].noteName);
                 } else if (e.which === 13 && notes.length === 0) {
                   this.createNewNote(searchValue, "").then(() =>
                     this.openNote(searchValue)
