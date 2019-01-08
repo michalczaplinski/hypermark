@@ -95,8 +95,8 @@ const OpenPreferences = styled.div`
 
 const UndoContainer = styled.div`
   position: absolute;
-  top: 5px;
-  right: 5px;
+  top: 3px;
+  right: 3px;
   z-index: 100;
 `;
 
