@@ -160,7 +160,7 @@ class Note extends Component {
           if (e.key === "Enter") {
             openNote(noteName);
           }
-          if (e.key === "Backspace") {
+          if (e.key === "Backspace" && e.metaKey) {
             deleteNote(noteName);
           }
         }}

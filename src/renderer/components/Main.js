@@ -328,7 +328,7 @@ class Main extends Component {
         this.setState({ undoVisible: true });
       })
       .then(() => {
-        setTimeout(() => this.setState({ undoVisible: false }), 5000);
+        setTimeout(() => this.setState({ undoVisible: false }), 9000);
       })
       .catch(err => {
         console.warn(err);
@@ -344,6 +344,7 @@ class Main extends Component {
       noteFileName,
       noteTitle: noteName
     });
+    this.mainWindow.hide();
   };
 
   renameNote = (oldName, newName) => {
@@ -447,7 +448,13 @@ class Main extends Component {
                 if (e.key === "Enter" && notes.length > 0) {
                   this.openNote(notes[0].noteName);
                 }
-                if (e.key === "Backspace" && notes.length > 0) {
+                if (
+                  e.key === "Backspace" &&
+                  e.metaKey &&
+                  notes.length > 0 &&
+                  currentFocusedNoteIndex === 0 &&
+                  searchValue === ""
+                ) {
                   this.deleteNote(notes[0].noteName);
                 } else if (e.which === 13 && notes.length === 0) {
                   this.createNewNote(searchValue, "").then(() =>
