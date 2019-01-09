@@ -6,6 +6,8 @@ import path from "path";
 import fs from "fs";
 import { promisify } from "util";
 import { is } from "electron-util";
+import log from "electron-log";
+
 import { validateObject } from "../util";
 import MainMenuBuilder from "../menu";
 
@@ -342,4 +344,8 @@ ipcMain.on("preferences-closed", () => {
   // the 5 is for the bottom edge
   height = searchListLength === 0 ? height : height + 5;
   state.mainWindow.setContentSize(420, height, true);
+});
+
+process.on("uncaughtException", err => {
+  log.error(err);
 });
