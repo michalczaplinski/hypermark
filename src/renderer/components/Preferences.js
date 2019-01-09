@@ -90,6 +90,12 @@ function mapKeys(codes) {
           return "⊞Win";
         }
       }
+      if (word === "Alt" && is.macos) {
+        return "⌥";
+      }
+      if (word === "Control") {
+        return "Ctrl";
+      }
       return word;
     })
     .join("+");
