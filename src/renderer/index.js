@@ -22,7 +22,7 @@ const store = new Store();
 
 class App extends React.Component {
   state = {
-    directoryPath: store.get("path"),
+    directoryPath: store.get("directoryPath"),
     fontSize: store.get("fontSize"),
     shortcut: store.get("shortcut"),
     showPreferences: false

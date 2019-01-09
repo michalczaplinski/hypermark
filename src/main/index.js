@@ -255,9 +255,9 @@ if (!gotTheLock) {
     });
 
     // Here we set the initial preferences !!!
-    if (!store.has("path")) {
+    if (!store.has("directoryPath")) {
       const directoryPath = path.join(app.getPath("userData"), "notes");
-      store.set("path", directoryPath);
+      store.set("directoryPath", directoryPath);
     }
     if (!store.has("fontSize")) {
       store.set("fontSize", 14);
