@@ -20,7 +20,8 @@ const store = new Store();
 const state = {
   mainWindow: undefined,
   lastWindowPosition: undefined,
-  openEditors: []
+  openEditors: [],
+  searchListLength: 5 // this is the initial number of items
 };
 
 const SEARCHBAR_HEIGHT = 70;
@@ -99,34 +100,56 @@ function registerGlobalShortcut(shortcut) {
 }
 
 function createEditorWindow(title) {
-  let [x, y] = state.mainWindow.getPosition();
-  switch (state.lastWindowPosition) {
-    case "leftTop":
-      [x, y] = [x + 100, y - 100];
-      state.lastWindowPosition = "rightTop";
-      break;
-    case "rightTop":
-      [x, y] = [x + 100, y + 100];
-      state.lastWindowPosition = "rightBottom";
-      break;
-    case "rightBottom":
-      [x, y] = [x - 100, y + 100];
-      state.lastWindowPosition = "leftBottom";
-      break;
-    case "leftBottom":
-      [x, y] = [x - 100, y - 100];
-      state.lastWindowPosition = "leftTop";
-      break;
-    default:
-      [x, y] = [x + 100, y - 100];
-      state.lastWindowPosition = "rightTop";
+  if (!store.has("openedWindows")) {
+    store.set("openedWindows", []);
+  }
+
+  const openedWindows = store.get("openedWindows", []);
+  const editorWindow = openedWindows.find(win => win.title === title);
+
+  let x;
+  let y;
+  let width = 565;
+  let height = 480;
+
+  if (editorWindow) {
+    x = editorWindow.x            //eslint-disable-line
+    y = editorWindow.y            //eslint-disable-line
+    width = editorWindow.width    //eslint-disable-line
+    height = editorWindow.height  //eslint-disable-line
+  } else {
+    openedWindows.push({ x, y, width, height, title });
+    store.set("openedWindows", openedWindows);
+
+    [x, y] = state.mainWindow.getPosition();
+    switch (state.lastWindowPosition) {
+      case "leftTop":
+        [x, y] = [x + 100, y - 100];
+        state.lastWindowPosition = "rightTop";
+        break;
+      case "rightTop":
+        [x, y] = [x + 100, y + 100];
+        state.lastWindowPosition = "rightBottom";
+        break;
+      case "rightBottom":
+        [x, y] = [x - 100, y + 100];
+        state.lastWindowPosition = "leftBottom";
+        break;
+      case "leftBottom":
+        [x, y] = [x - 100, y - 100];
+        state.lastWindowPosition = "leftTop";
+        break;
+      default:
+        [x, y] = [x + 100, y - 100];
+        state.lastWindowPosition = "rightTop";
+    }
   }
 
   const window = new BrowserWindow({
     x,
     y,
-    width: 565,
-    height: 480,
+    width,
+    height,
     minWidth: 200,
     title
   });
@@ -147,7 +170,19 @@ function createEditorWindow(title) {
     const editor = state.openEditors.find(
       e => e.noteTitle === event.sender.editorProps.noteTitle
     );
+
     if (editor) {
+      const [width, height] = editor.editorWindow.getContentSize();
+      const [x, y] = editor.editorWindow.getPosition();
+
+      const openedWindows = store.get("openedWindows", []);
+      const index = openedWindows.findIndex(e => e.title === title);
+
+      if (index !== -1) {
+        openedWindows[index] = { x, y, width, height, title };
+        store.set("openedWindows", openedWindows);
+      }
+
       editor.editorWindow = null;
       state.openEditors = state.openEditors.filter(
         e => e.noteTitle !== event.sender.editorProps.noteTitle
