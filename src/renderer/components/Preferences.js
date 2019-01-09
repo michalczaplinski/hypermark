@@ -1,14 +1,11 @@
-import React from "react";
+import React, { Fragment } from "react";
 import styled from "styled-components";
 import { remote } from "electron"; // eslint-disable-line
-import Mstrp from "mousetrap";
-import "mousetrap-global-bind";
-import record from "mousetrap-record";
 
-import Dots from "./Dots";
+import { is } from "electron-util";
+
 import { makeArray } from "../../util";
-
-const Mousetrap = record(Mstrp);
+import KeyListener from "./KeyListener";
 
 const Container = styled.div`
   -webkit-user-select: none;
@@ -82,6 +79,22 @@ const DisabledInput = styled.div`
   margin-bottom: 6px;
 `;
 
+function mapKeys(codes) {
+  return codes
+    .map(word => {
+      if (word === "Meta") {
+        if (is.macos) {
+          return "⌘";
+        }
+        if (is.windows) {
+          return "⊞Win";
+        }
+      }
+      return word;
+    })
+    .join("+");
+}
+
 class Preferences extends React.Component {
   state = {
     recordingKeys: false
@@ -141,28 +154,45 @@ class Preferences extends React.Component {
           </select>
           <Heading>Global shortcut </Heading>
           <Text>This shortcut will open the app from anywhere</Text>
-          <DisabledInput> {recordingKeys ? <Dots /> : shortcut} </DisabledInput>
-          {!recordingKeys && (
-            <button
-              onClick={() => {
-                this.setState({ recordingKeys: true });
-
-                Mousetrap.record(s => {
-                  const seq = s[0].split("+");
-                  const sequence = seq.map(word => {
-                    if (word === "meta") {
-                      return "CmdOrCtrl";
-                    }
-                    return word.slice(0, 1).toUpperCase() + word.slice(1);
-                  });
-                  updateShortcut(sequence.join("+"));
-                  this.setState({ recordingKeys: false });
-                }, 50);
-              }}
-            >
-              Record...
-            </button>
-          )}
+          <KeyListener>
+            {({ codes, clear }) => (
+              <div>
+                <DisabledInput>
+                  {recordingKeys
+                    ? mapKeys(codes)
+                    : mapKeys(shortcut.split("+"))}
+                </DisabledInput>
+                {recordingKeys ? (
+                  <Fragment>
+                    <button
+                      onClick={() => {
+                        clear();
+                      }}
+                    >
+                      Clear
+                    </button>
+                    <button
+                      onClick={() => {
+                        this.setState({ recordingKeys: false });
+                        updateShortcut(codes.join("+"));
+                      }}
+                    >
+                      Update
+                    </button>
+                  </Fragment>
+                ) : (
+                  <button
+                    onClick={() => {
+                      clear();
+                      this.setState({ recordingKeys: true });
+                    }}
+                  >
+                    Record...
+                  </button>
+                )}
+              </div>
+            )}
+          </KeyListener>
         </ContentContainer>
       </Container>
     );
