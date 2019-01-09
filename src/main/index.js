@@ -14,8 +14,8 @@ import MainMenuBuilder from "../menu";
 require("electron-context-menu")();
 
 const { COPYFILE_EXCL } = fs.constants;
-
 const asyncCopyFile = promisify(fs.copyFile);
+const store = new Store();
 
 const state = {
   mainWindow: undefined,
@@ -186,7 +186,7 @@ const gotTheLock = app.requestSingleInstanceLock();
 if (!gotTheLock) {
   app.quit();
 } else {
-  app.on("second-instance", (event, commandLine, workingDirectory) => {
+  app.on("second-instance", () => {
     // Someone tried to run a second instance, we should focus our window.
     if (state.mainWindow) {
       if (state.mainWindow.isMinimized()) state.mainWindow.restore();
@@ -220,7 +220,6 @@ if (!gotTheLock) {
     });
 
     // Here we set the initial preferences !!!
-    const store = new Store();
     if (!store.has("path")) {
       const directoryPath = path.join(app.getPath("userData"), "notes");
       store.set("path", directoryPath);
@@ -319,7 +318,6 @@ ipcMain.on("update-shortcut", (event, { shortcut }) => {
       return;
     }
 
-    const store = new Store();
     store.set("shortcut", shortcut);
     state.mainWindow.webContents.send("update-shortcut-success", { shortcut });
   } catch (e) {
@@ -328,7 +326,7 @@ ipcMain.on("update-shortcut", (event, { shortcut }) => {
 });
 
 ipcMain.on("preferences-open", () => {
-  const [_, height] = state.mainWindow.getContentSize();
+  const [_, height] = state.mainWindow.getContentSize(); // eslint-disable-line
 
   if (height < 375) {
     state.mainWindow.setContentSize(420, 375, true);

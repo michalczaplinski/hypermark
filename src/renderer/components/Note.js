@@ -117,7 +117,6 @@ class Note extends Component {
   };
 
   componentDidMount() {
-    const { isBeingRenamed } = this.state;
     window.addEventListener("keyup", e => {
       if (e.key === "Escape") {
         this.setState({ isBeingRenamed: false });
