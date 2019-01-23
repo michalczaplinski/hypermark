@@ -12,7 +12,8 @@
     "compile": "electron-webpack",
     "compile:dll": "electron-webpack dll",
     "dist": "yarn compile && electron-builder",
-    "dist:dir": "yarn dist --dir -c.compression=store -c.mac.identity=null"
+    "dist:dir": "yarn dist --dir -c.compression=store -c.mac.identity=null",
+    "release": "./release"
   },
   "dependencies": {
     "codemirror": "^5.39.0",
