@@ -1,7 +1,7 @@
 {
   "name": "hypermark",
   "description": "📓Stickies meets nvALT markdown editor",
-  "version": "0.6.0",
+  "version": "0.7.0",
   "private": true,
   "author": "Michal Czaplinski <mmczaplinski@gmail.com>",
   "homepage": "https://github.com/michalczaplinski/hypermark",
