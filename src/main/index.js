@@ -29,6 +29,32 @@ const ITEM_HEIGHT = 60;
 
 const isDevelopment = process.env.NODE_ENV !== "production";
 
+function copyReadmeFile() {
+  const pathToNotes = path.join(app.getPath("userData"), "notes");
+  if (!fs.existsSync(pathToNotes)) {
+    fs.mkdirSync(pathToNotes);
+  }
+
+  let separator = "";
+  if (is.macos) {
+    separator = "..";
+  }
+
+  asyncCopyFile(
+    path.join(
+      path.dirname(app.getAppPath()),
+      separator,
+      `static/👉 Read This First 👈.md`
+    ),
+    path.join(pathToNotes, "👉 Read This First 👈.md"),
+    COPYFILE_EXCL
+  ).catch(err => {
+    if (err) {
+      console.error(err);
+    }
+  });
+}
+
 function createMainWindow() {
   const window = new BrowserWindow({
     width: 420,
@@ -230,29 +256,9 @@ if (!gotTheLock) {
   });
 
   app.on("ready", () => {
-    const pathToNotes = path.join(app.getPath("userData"), "notes");
-    if (!fs.existsSync(pathToNotes)) {
-      fs.mkdirSync(pathToNotes);
+    if (!isDevelopment) {
+      copyReadmeFile();
     }
-
-    let separator = "";
-    if (is.macos) {
-      separator = "..";
-    }
-
-    asyncCopyFile(
-      path.join(
-        path.dirname(app.getAppPath()),
-        separator,
-        `static/👉 Read This First 👈.md`
-      ),
-      path.join(pathToNotes, "👉 Read This First 👈.md"),
-      COPYFILE_EXCL
-    ).catch(err => {
-      if (err) {
-        console.error(err);
-      }
-    });
 
     // Here we set the initial preferences !!!
     if (!store.has("directoryPath")) {
