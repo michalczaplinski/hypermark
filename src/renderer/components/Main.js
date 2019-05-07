@@ -250,6 +250,10 @@ class Main extends Component {
     return currentSearchNotes;
   };
 
+  clearSearch = () => {
+    this.setState({ searchValue: "" });
+  };
+
   hasValue = async (searchValue, noteFileName) => {
     try {
       const noteContents = await asyncReadFile(
@@ -345,6 +349,7 @@ class Main extends Component {
       noteTitle: noteName
     });
     this.mainWindow.hide();
+    this.clearSearch();
   };
 
   renameNote = (oldName, newName) => {

@@ -12,7 +12,7 @@ import "./../style/index.css";
 
 const theme = {
   mainColor: "#ffffff",
-  hoverColor: "#EFEFEF",
+  hoverColor: "#f7f7f7",
   buttonTextColor: "#444444",
   focusColor: "#d7f0ff",
   deleteColor: "#D33F49"
