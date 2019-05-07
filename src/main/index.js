@@ -271,6 +271,9 @@ if (!gotTheLock) {
     if (!store.has("shortcut")) {
       store.set("shortcut", "CommandOrControl+Shift+L");
     }
+    if (!store.has("showOfflineWarning")) {
+      store.set("showOfflineWarning", true);
+    }
 
     state.mainWindow = createMainWindow();
     const menuBuilder = new MainMenuBuilder(state.mainWindow);
