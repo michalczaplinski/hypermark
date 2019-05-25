@@ -1,5 +1,6 @@
 #!/bin/bash
-set -o pipefail
+set -eu -o pipefail
+set -a
 
 # This script takes care of all the release stuff
 # Usage: 
