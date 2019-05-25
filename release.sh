@@ -6,8 +6,6 @@ set -a
 # Usage: 
 # ./release.sh --patch | --minor | --major
 
-USING_RELEASE_SCRIPT=true
-
 case "$1" in
     --patch) 
       version=patch
