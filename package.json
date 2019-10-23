@@ -30,6 +30,7 @@
     "mousetrap": "^1.6.2",
     "mousetrap-global-bind": "^1.1.0",
     "mousetrap-record": "^1.0.1",
+    "polished": "^3.4.1",
     "prop-types": "^15.6.2",
     "react": "16.8",
     "react-dom": "16.8",

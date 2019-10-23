@@ -6,6 +6,7 @@ import Mousetrap from "mousetrap";
 import "mousetrap-global-bind";
 import path from "path";
 import fs from "fs";
+import { darken } from "polished";
 
 import { promisify } from "util";
 import Note from "./Note";
@@ -112,21 +113,13 @@ const AddNote = styled.button`
   padding: 5px;
   padding-left: 7px;
   padding-right: 7px;
-  background-color: transparent;
-  font-size: 25px;
+  color: ${({ theme }) => theme.buttonTextColor};
+  background-color: ${({ theme }) => theme.hoverColor};
+  font-size: 12px;
 
   &:hover {
     cursor: pointer;
-    color: ${({ theme }) => theme.buttonTextColor};
-    background-color: ${({ theme }) => theme.hoverColor};
-  }
-  &:before {
-    content: "⏎";
-  }
-
-  &:hover:before {
-    font-size: 12px;
-    content: "CREATE";
+    background-color: ${({ theme }) => darken(0.04, theme.hoverColor)};
   }
 
   &:focus {
@@ -476,7 +469,9 @@ class Main extends Component {
                       this.openNote(searchValue)
                     )
                   }
-                />
+                >
+                  CREATE
+                </AddNote>
               )}
           </TopBarWrapper>
         </TopAbsoluteWrapper>

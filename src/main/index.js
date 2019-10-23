@@ -64,12 +64,11 @@ function createMainWindow() {
     fullscreenable: false,
     disableAutoHideCursor: true,
     show: false,
-    resizable: false
+    resizable: isDevelopment
   });
 
   if (isDevelopment || process.env.DEBUG_PROD === "true") {
-    window.isResizable = true;
-    window.setSize(1000, 800);
+    window.setSize(900, 600);
     window.setMaximumSize(1000, 1000);
     window.webContents.openDevTools();
   }
