@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain, globalShortcut, ipcRenderer } from "electron"; //eslint-disable-line
+import { app, BrowserWindow, ipcMain, globalShortcut, ipcRenderer, shell } from "electron"; //eslint-disable-line
 import Joi from "joi";
 import { format as formatUrl } from "url";
 import Store from "electron-store";
@@ -68,6 +68,9 @@ function createMainWindow() {
   });
 
   if (isDevelopment || process.env.DEBUG_PROD === "true") {
+    window.isResizable = true;
+    window.setSize(1000, 800);
+    window.setMaximumSize(1000, 1000);
     window.webContents.openDevTools();
   }
 
@@ -221,6 +224,13 @@ function createEditorWindow(title) {
     setImmediate(() => {
       window.focus();
     });
+  });
+
+  window.webContents.on("new-window", (e, url) => {
+    if (url !== window.webContents.getURL()) {
+      e.preventDefault();
+      shell.openExternal(url);
+    }
   });
 
   return window;

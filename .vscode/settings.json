@@ -7,4 +7,6 @@
     "todo-tree.expanded": true,
     "typescript.tsdk": "node_modules/typescript/lib",
     "eslint.enable": true,
+    "todo-tree.tree.expanded": true,
+    "todo-tree.tree.flat": false,
 }
