@@ -4,11 +4,13 @@ import { ipcRenderer } from "electron"; //eslint-disable-line
 import { ThemeProvider } from "styled-components";
 import Store from "electron-store";
 
+import "./../style/index.css";
+
 import Main from "./components/Main";
 import Editor from "./components/Editor";
 import Preferences from "./components/Preferences";
 
-import "./../style/index.css";
+import "./loadModes";
 
 const theme = {
   mainColor: "#ffffff",

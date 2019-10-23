@@ -4,14 +4,9 @@ import { remote } from "electron"; //eslint-disable-line
 import Store from "electron-store";
 import styled from "styled-components";
 
-import "codemirror/lib/codemirror.css";
-import "codemirror/addon/fold/foldgutter.css";
-
-import "../hypermd/mode/hypermd.css";
-import "../hypermd/theme/hypermd-light.css";
 import { queueForSaving } from "../../services/fileManager";
 
-const hyperMD = require("ultramd");
+const HyperMD = require("hypermd");
 
 const Overlay = styled.div`
   z-index: 10;
@@ -48,8 +43,8 @@ export default function Editor({ fontSize, directoryPath }) {
 
   useEffect(() => {
     const myTextarea = document.getElementById("textarea");
-    const editor = hyperMD.fromTextArea(myTextarea, {
-      hmdModeLoader: false,
+    const editor = HyperMD.fromTextArea(myTextarea, {
+      hmdModeLoader: "false",
       lineNumbers: false,
       gutters: [],
       foldGutters: false

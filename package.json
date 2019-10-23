@@ -23,9 +23,9 @@
     "electron-log": "^2.2.17",
     "electron-store": "^2.0.0",
     "electron-util": "^0.10.2",
+    "hypermd": "^0.3.11",
     "joi": "^13.4.0",
     "lodash": "^4.17.10",
-    "lodash.fill": "^3.4.0",
     "moment": "^2.22.2",
     "mousetrap": "^1.6.2",
     "mousetrap-global-bind": "^1.1.0",
@@ -34,8 +34,7 @@
     "react": "16.8",
     "react-dom": "16.8",
     "source-map-support": "^0.5.5",
-    "styled-components": "^3.3.3",
-    "ultramd": "^0.0.3"
+    "styled-components": "^3.3.3"
   },
   "devDependencies": {
     "@babel/plugin-proposal-class-properties": "^7.0.0-beta.53",
@@ -43,6 +42,7 @@
     "@babel/preset-react": "^7.0.0-beta.54",
     "babel-eslint": "8.2.3",
     "babel-plugin-unassert": "^2.1.2",
+    "css-loader": "^3.2.0",
     "electron": "^3.0.10",
     "electron-builder": "^20.19.2",
     "electron-webpack": "^2.0.1",
@@ -57,9 +57,14 @@
     "file-loader": "^1.1.11",
     "jest": "^23.4.1",
     "prettier": "1.13.5",
+    "url-loader": "^2.2.0",
     "webpack": "^4.8.1"
   },
   "electronWebpack": {
+    "whiteListedModules": [
+      "hypermd",
+      "codemirror"
+    ],
     "renderer": {
       "webpackConfig": "webpack.renderer.config.js"
     },
