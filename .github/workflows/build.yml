@@ -7,6 +7,7 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     strategy:
+      fail-fast: false # we want to build other platforms even if one of them fails
       matrix:
         os: [macos-latest, ubuntu-latest, windows-latest]
 

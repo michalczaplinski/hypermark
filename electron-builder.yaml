@@ -4,11 +4,6 @@ productName: Hypermark
 
 asar: true
 
-# commented out cause these should be the defaults
-# directories:
-#   buildResources: build/
-#   output: dist/
-
 files:
   - package.json
   
@@ -41,3 +36,4 @@ linux:
   target:
     - deb
     - AppImage
+  category: Office
