@@ -23,18 +23,13 @@ body {
     height: 100%;
 }
 
-#app > .CodeMirror {
+#app .CodeMirror {
     height: 100%;
 }
 
 button {
     -webkit-app-region: no-drag;
 }
-
-.cm-s-hypermd-light div.CodeMirror-cursors {
-    left: 17px;
-}
-
 
 .cm-s-hypermd-light .CodeMirror-code pre.HyperMD-codeblock { 
     font-family: Menlo, monospace;
@@ -46,11 +41,6 @@ button {
 .cm-s-hypermd-light .CodeMirror-code div.HyperMD-codeblock-bg, div.HyperMD-codeblock-begin-bg, div.HyperMD-codeblock-begin-end {
     background-color: rgba(231, 231, 231, 0.5); /* TODO: make this into a variable */
     border: none;
-}
-
-.cm-s-hypermd-light div.CodeMirror-code {
-    padding-right: 17px;
-    padding-left: 17px;
 }
 
 .cm-s-hypermd-light .CodeMirror-code span.cm-formatting-list {

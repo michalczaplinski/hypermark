@@ -96,11 +96,13 @@ export default function Editor({ fontSize, directoryPath }) {
           </Overlay>
         )}
 
-      <textarea
-        value={noteContents}
-        id="textarea"
-        style={{ height: "100%", display: "none" }}
-      />
+      <div style={{ paddingLeft: 17, paddingRight: 5 }}>
+        <textarea
+          value={noteContents}
+          id="textarea"
+          style={{ height: "100%", display: "none" }}
+        />
+      </div>
     </>
   );
 }
