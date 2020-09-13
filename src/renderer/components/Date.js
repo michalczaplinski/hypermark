@@ -1,6 +1,9 @@
 import React from "react";
-import styled from "styled-components";
-import moment from "moment";
+import styled from "@emotion/styled";
+import dayjs from "dayjs";
+import relativeTime from "dayjs/plugin/relativeTime";
+
+dayjs.extend(relativeTime);
 
 const StyledDate = styled.div`
   -webkit-user-select: none;
@@ -24,14 +27,14 @@ const At = styled.div`
 
 const Date = ({ timestamp }) => {
   let date;
-  if (moment(timestamp).isAfter(moment().subtract(1, "days"))) {
-    date = <StyledDate>{moment(timestamp).fromNow()}</StyledDate>;
+  if (dayjs(timestamp).isAfter(dayjs().subtract(1, "days"))) {
+    date = <StyledDate>{dayjs(timestamp).fromNow()}</StyledDate>;
   } else {
     date = (
       <DateContainer>
-        <StyledDate>{moment(timestamp).format("MMM Do YYYY")}</StyledDate>{" "}
+        <StyledDate>{dayjs(timestamp).format("MMM D YYYY")}</StyledDate>{" "}
         <At> at </At>{" "}
-        <StyledDate>{moment(timestamp).format("h:mma")}</StyledDate>
+        <StyledDate>{dayjs(timestamp).format("h:mma")}</StyledDate>
       </DateContainer>
     );
   }

@@ -1,8 +1,8 @@
 import fs from "fs";
-import { debounce } from "lodash";
+import debounce from "lodash.debounce";
 
 function _queueForSaving(location, data) {
-  fs.writeFile(location, data, err => {
+  fs.writeFile(location, data, (err) => {
     if (err) {
       throw err;
     }
@@ -11,5 +11,5 @@ function _queueForSaving(location, data) {
 
 export const queueForSaving = debounce(_queueForSaving, 2000, {
   leading: false,
-  trailing: true
+  trailing: true,
 });

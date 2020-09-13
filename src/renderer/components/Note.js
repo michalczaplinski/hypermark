@@ -1,5 +1,6 @@
 import React, { Component } from "react";
-import styled, { css, injectGlobal } from "styled-components";
+import styled from "@emotion/styled";
+import { css, Global } from "@emotion/core";
 import { focusStyles } from "../../style";
 import Date from "./Date";
 
@@ -104,20 +105,14 @@ const RenamingInput = styled.input`
   pointer-events: auto;
 `;
 
-injectGlobal`
-  :not(${RenamingInput}) {
-    pointer-events: var(--pointer-events);
-  }
-`;
-
 class Note extends Component {
   state = {
     isHovered: false,
-    isBeingRenamed: false
+    isBeingRenamed: false,
   };
 
   componentDidMount() {
-    window.addEventListener("keyup", e => {
+    window.addEventListener("keyup", (e) => {
       if (e.key === "Escape") {
         this.setState({ isBeingRenamed: false });
         e.preventDefault();
@@ -143,73 +138,82 @@ class Note extends Component {
       document.documentElement.style.setProperty("--pointer-events", "auto");
     }
     return (
-      <StyledNote // eslint-disable-line
-        onMouseOver={() => this.setState({ isHovered: true })}
-        onMouseLeave={() => this.setState({ isHovered: false })}
-        onClick={() => {
-          if (isBeingRenamed) {
-            return;
-          }
-          openNote(noteName);
-        }}
-        onKeyUp={e => {
-          if (isBeingRenamed) {
-            return;
-          }
-          if (e.key === "Enter") {
+      <>
+        <Global
+          styles={css`
+            :not(${RenamingInput}) {
+              pointer-events: var(--pointer-events);
+            }
+          `}
+        />
+        <StyledNote
+          onMouseOver={() => this.setState({ isHovered: true })}
+          onMouseLeave={() => this.setState({ isHovered: false })}
+          onClick={() => {
+            if (isBeingRenamed) {
+              return;
+            }
             openNote(noteName);
-          }
-          if (e.key === "Backspace" && e.metaKey) {
-            deleteNote(noteName);
-          }
-        }}
-        {...props}
-      >
-        {isBeingRenamed ? (
-          <RenamingInput
-            innerRef={input => input && input.focus()}
-            type="text"
-            onFocus={e => e.target.select()}
-            defaultValue={noteName}
-            onKeyDown={e => {
-              if (e.key === "Enter") {
-                e.target.blur();
-                renameNote(noteName, e.target.value);
-              } else if (e.key === "Escape") {
-                e.target.blur();
-              }
-            }}
-            onBlur={() => this.setState({ isBeingRenamed: false })}
-          />
-        ) : (
-          <Title hovered={isHovered}>{noteName}</Title>
-        )}
-        {isHovered && (
-          <OptionsContainer>
-            <Option
-              tabIndex="-1"
-              onClick={e => {
-                e.stopPropagation();
-                this.setState({ isBeingRenamed: true });
+          }}
+          onKeyUp={(e) => {
+            if (isBeingRenamed) {
+              return;
+            }
+            if (e.key === "Enter") {
+              openNote(noteName);
+            }
+            if (e.key === "Backspace" && e.metaKey) {
+              deleteNote(noteName);
+            }
+          }}
+          {...props}
+        >
+          {isBeingRenamed ? (
+            <RenamingInput
+              ref={(input) => input && input.focus()}
+              type="text"
+              onFocus={(e) => e.target.select()}
+              defaultValue={noteName}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.target.blur();
+                  renameNote(noteName, e.target.value);
+                } else if (e.key === "Escape") {
+                  e.target.blur();
+                }
               }}
-            >
-              rename
-            </Option>
-            <Option
-              tabIndex="-1"
-              onClick={e => {
-                e.stopPropagation();
-                deleteNote(noteName);
-              }}
-            >
-              delete
-            </Option>
-          </OptionsContainer>
-        )}
-        <DateContainer>
-          <Date timestamp={lastModified} />
-        </DateContainer>
-      </StyledNote>
+              onBlur={() => this.setState({ isBeingRenamed: false })}
+            />
+          ) : (
+            <Title hovered={isHovered}>{noteName}</Title>
+          )}
+          {isHovered && (
+            <OptionsContainer>
+              <Option
+                tabIndex="-1"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  this.setState({ isBeingRenamed: true });
+                }}
+              >
+                rename
+              </Option>
+              <Option
+                tabIndex="-1"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  deleteNote(noteName);
+                }}
+              >
+                delete
+              </Option>
+            </OptionsContainer>
+          )}
+          <DateContainer>
+            <Date timestamp={lastModified} />
+          </DateContainer>
+        </StyledNote>
+      </>
     );
   }
 }

@@ -1,8 +1,8 @@
-import { css } from "styled-components";
+import { css } from "@emotion/core";
 
-export const focusStyles = css`
+export const focusStyles = ({ theme }) => css`
   cursor: pointer;
-  background-color: ${({ theme }) => theme.focusColor};
+  background-color: ${theme.focusColor};
   outline: none;
 `;
 

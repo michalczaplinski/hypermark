@@ -1,6 +1,5 @@
 import React from "react";
-import PropTypes from "prop-types";
-import styled from "styled-components";
+import styled from "@emotion/styled";
 
 const UndoButtonStyled = styled.div`
   background-color: #4c4c4c;
@@ -84,10 +83,5 @@ const UndoButton = ({ onClick, hideUndo }) => (
     </DismissButtonContainer>
   </UndoButtonStyled>
 );
-
-UndoButton.propTypes = {
-  onClick: PropTypes.func.isRequired,
-  hideUndo: PropTypes.func.isRequired
-};
 
 export default UndoButton;

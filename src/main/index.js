@@ -1,5 +1,11 @@
-import { app, BrowserWindow, ipcMain, globalShortcut, ipcRenderer, shell } from "electron"; //eslint-disable-line
-import Joi from "joi";
+import {
+  app,
+  BrowserWindow,
+  ipcMain,
+  globalShortcut,
+  ipcRenderer,
+  shell,
+} from "electron"; //eslint-disable-line
 import { format as formatUrl } from "url";
 import Store from "electron-store";
 import path from "path";
@@ -8,8 +14,8 @@ import { promisify } from "util";
 import { is } from "electron-util";
 import log from "electron-log";
 
-import { validateObject } from "../util";
 import MainMenuBuilder from "../menu";
+import assert from "assert";
 
 require("electron-context-menu")();
 
@@ -21,7 +27,7 @@ const state = {
   mainWindow: undefined,
   lastWindowPosition: undefined,
   openEditors: [],
-  searchListLength: 5 // this is the initial number of items
+  searchListLength: 5, // this is the initial number of items
 };
 
 const SEARCHBAR_HEIGHT = 70;
@@ -48,7 +54,7 @@ function copyReadmeFile() {
     ),
     path.join(pathToNotes, "👉 Read This First 👈.md"),
     COPYFILE_EXCL
-  ).catch(err => {
+  ).catch((err) => {
     if (err) {
       console.error(err);
     }
@@ -64,7 +70,12 @@ function createMainWindow() {
     fullscreenable: false,
     disableAutoHideCursor: true,
     show: false,
-    resizable: isDevelopment
+    resizable: isDevelopment,
+    webPreferences: {
+      nodeIntegration: true,
+      enableRemoteModule: true,
+      worldSafeExecuteJavaScript: true,
+    },
   });
 
   if (isDevelopment || process.env.DEBUG_PROD === "true") {
@@ -80,7 +91,7 @@ function createMainWindow() {
       formatUrl({
         pathname: path.join(__dirname, "index.html"),
         protocol: "file",
-        slashes: true
+        slashes: true,
       })
     );
   }
@@ -133,7 +144,7 @@ function createEditorWindow(title) {
   }
 
   const openedWindows = store.get("openedWindows", []);
-  const editorWindow = openedWindows.find(win => win.title === title);
+  const editorWindow = openedWindows.find((win) => win.title === title);
 
   let x;
   let y;
@@ -141,10 +152,10 @@ function createEditorWindow(title) {
   let height = 480;
 
   if (editorWindow) {
-    x = editorWindow.x            //eslint-disable-line
-    y = editorWindow.y            //eslint-disable-line
-    width = editorWindow.width    //eslint-disable-line
-    height = editorWindow.height  //eslint-disable-line
+    x = editorWindow.x; //eslint-disable-line
+    y = editorWindow.y; //eslint-disable-line
+    width = editorWindow.width; //eslint-disable-line
+    height = editorWindow.height; //eslint-disable-line
   } else {
     openedWindows.push({ x, y, width, height, title });
     store.set("openedWindows", openedWindows);
@@ -179,7 +190,12 @@ function createEditorWindow(title) {
     width,
     height,
     minWidth: 200,
-    title
+    title,
+    webPreferences: {
+      nodeIntegration: true,
+      enableRemoteModule: true,
+      worldSafeExecuteJavaScript: true,
+    },
   });
 
   if (isDevelopment || process.env.DEBUG_PROD === "true") {
@@ -194,9 +210,9 @@ function createEditorWindow(title) {
     window.loadURL(`file:///${__dirname}/index.html?editor`);
   }
 
-  window.on("close", event => {
+  window.on("close", (event) => {
     const editor = state.openEditors.find(
-      e => e.noteTitle === event.sender.editorProps.noteTitle
+      (e) => e.noteTitle === event.sender.editorProps.noteTitle
     );
 
     if (editor) {
@@ -204,7 +220,7 @@ function createEditorWindow(title) {
       const [x, y] = editor.editorWindow.getPosition();
 
       const openedWindows = store.get("openedWindows", []);
-      const index = openedWindows.findIndex(e => e.title === title);
+      const index = openedWindows.findIndex((e) => e.title === title);
 
       if (index !== -1) {
         openedWindows[index] = { x, y, width, height, title };
@@ -213,7 +229,7 @@ function createEditorWindow(title) {
 
       editor.editorWindow = null;
       state.openEditors = state.openEditors.filter(
-        e => e.noteTitle !== event.sender.editorProps.noteTitle
+        (e) => e.noteTitle !== event.sender.editorProps.noteTitle
       );
     }
   });
@@ -302,16 +318,14 @@ app.on("will-quit", () => {
 // ///////////////////////////////////////////////////////////////////////////
 
 ipcMain.on("open-editor", (_, payload) => {
-  validateObject(payload, {
-    noteContents: Joi.string().allow(""),
-    noteFileName: Joi.string().trim(),
-    noteTitle: Joi.string()
-      .trim()
-      .min(1)
-  });
+  const { noteContents, noteFileName, noteTitle } = payload;
 
-  const { noteTitle } = payload;
-  const editor = state.openEditors.find(e => e.noteTitle === noteTitle);
+  assert(typeof noteContents === "string");
+  assert(typeof noteFileName === "string");
+  assert(typeof noteTitle === "string");
+  assert(noteTitle.trim().length > 1);
+
+  const editor = state.openEditors.find((e) => e.noteTitle === noteTitle);
 
   if (editor) {
     editor.editorWindow.focus();
@@ -320,31 +334,31 @@ ipcMain.on("open-editor", (_, payload) => {
     editorWindow.editorProps = payload;
     state.openEditors.push({
       editorWindow,
-      ...payload
+      ...payload,
     });
   }
 });
 
 ipcMain.on("update-editor-title", (_, { title, newTitle, newFileName }) => {
   // TODO: I think we need stronger guarantees here that the state is consistent
-  const editor = state.openEditors.find(e => e.noteTitle === title);
+  const editor = state.openEditors.find((e) => e.noteTitle === title);
   if (editor) {
     editor.noteTitle = newTitle;
     editor.noteFileName = newFileName;
     editor.editorWindow.setTitle(newTitle);
     editor.editorWindow.editorProps = {
       noteTitle: newTitle,
-      noteFileName: newFileName
+      noteFileName: newFileName,
     };
-    state.openEditors = state.openEditors.filter(e => e.noteTitle !== title);
+    state.openEditors = state.openEditors.filter((e) => e.noteTitle !== title);
   }
 });
 
 ipcMain.on("delete-editor", (_, { title }) => {
-  const editor = state.openEditors.find(e => e.noteTitle === title);
+  const editor = state.openEditors.find((e) => e.noteTitle === title);
   if (editor) {
     editor.editorWindow.close();
-    state.openEditors = state.openEditors.filter(e => e.noteTitle !== title);
+    state.openEditors = state.openEditors.filter((e) => e.noteTitle !== title);
   }
 });
 
@@ -397,6 +411,6 @@ ipcMain.on("preferences-closed", () => {
   state.mainWindow.setContentSize(420, height, true);
 });
 
-process.on("uncaughtException", err => {
+process.on("uncaughtException", (err) => {
   log.error(err);
 });

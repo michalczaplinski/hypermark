@@ -1,5 +1,5 @@
 import React, { Fragment } from "react";
-import styled from "styled-components";
+import styled from "@emotion/styled";
 import { remote } from "electron"; // eslint-disable-line
 
 import { is } from "electron-util";

@@ -1,13 +1,8 @@
 import React from "react";
-import PropTypes from "prop-types";
 
 export default class KeyListener extends React.Component {
-  static propTypes = {
-    children: PropTypes.func.isRequired
-  };
-
   state = {
-    codes: new Set()
+    codes: new Set(),
   };
 
   componentDidMount() {
@@ -21,7 +16,7 @@ export default class KeyListener extends React.Component {
   onKeyDown = ({ key }) => {
     this.setState(({ codes }) => {
       let hasOthers = false;
-      codes.forEach(code => {
+      codes.forEach((code) => {
         if (!this.isMeta(code)) {
           hasOthers = true;
         }
@@ -36,7 +31,7 @@ export default class KeyListener extends React.Component {
     });
   };
 
-  isMeta = code => ["Meta", "Alt", "Shift", "Control"].includes(code);
+  isMeta = (code) => ["Meta", "Alt", "Shift", "Control"].includes(code);
 
   clear = () => this.setState({ codes: new Set() });
 

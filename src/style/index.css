@@ -1,48 +1,56 @@
-
 * {
-    box-sizing: border-box;
+  box-sizing: border-box;
 }
 
-html, body { 
-    box-sizing: border-box;
-    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-    font-weight: 400;
-    color: #37352f;  /* TODO: make this into a variable */
+html,
+body {
+  box-sizing: border-box;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+  font-weight: 300;
+  color: #333; /* TODO: make this into a variable */
 }
 
-body { 
-    width: 100%;
-    height: 100vh;
-    margin: 0;
-    padding: 0;
-    -webkit-app-region: drag;
-    background-color: transparent;
+body {
+  width: 100%;
+  height: 100vh;
+  margin: 0;
+  padding: 0;
+  -webkit-app-region: drag;
+  background-color: transparent;
 }
 
 #app {
-    height: 100%;
+  height: 100%;
 }
 
 #app .CodeMirror {
-    height: 100%;
+  height: 100%;
 }
 
 button {
-    -webkit-app-region: no-drag;
+  -webkit-app-region: no-drag;
 }
 
-.cm-s-hypermd-light .CodeMirror-code pre.HyperMD-codeblock { 
-    font-family: Menlo, monospace;
-    font-size: 12px;
-    line-height: 18px;
-    color: #333;    /* TODO: make this into a variable */
+.cm-s-hypermd-light .CodeMirror-code pre.HyperMD-codeblock {
+  font-family: Menlo, monospace;
+  font-size: 12px;
+  line-height: 18px;
+  color: #333; /* TODO: make this into a variable */
 }
 
-.cm-s-hypermd-light .CodeMirror-code div.HyperMD-codeblock-bg, div.HyperMD-codeblock-begin-bg, div.HyperMD-codeblock-begin-end {
-    background-color: rgba(231, 231, 231, 0.5); /* TODO: make this into a variable */
-    border: none;
+.cm-s-hypermd-light .CodeMirror-code div.HyperMD-codeblock-bg,
+div.HyperMD-codeblock-begin-bg,
+div.HyperMD-codeblock-begin-end {
+  background-color: rgba(
+    231,
+    231,
+    231,
+    0.5
+  ); /* TODO: make this into a variable */
+  border: none;
 }
 
 .cm-s-hypermd-light .CodeMirror-code span.cm-formatting-list {
-    font-family: inherit;
+  font-family: inherit;
 }
