@@ -1,7 +1,7 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import ReactDOM from "react-dom";
-import { ipcRenderer } from "electron"; //eslint-disable-line
-import { ThemeProvider } from "styled-components";
+import { ipcRenderer } from "electron";
+import { ThemeProvider } from "emotion-theming";
 import Store from "electron-store";
 
 import "./../style/index.css";
@@ -17,98 +17,97 @@ const theme = {
   hoverColor: "#f7f7f7",
   buttonTextColor: "#444444",
   focusColor: "#d7f0ff",
-  deleteColor: "#D33F49"
+  deleteColor: "#D33F49",
 };
 
 const store = new Store();
 
-class App extends React.Component {
-  state = {
+function App() {
+  const [state, setState] = useState({
     directoryPath: store.get("directoryPath"),
     fontSize: store.get("fontSize"),
     shortcut: store.get("shortcut"),
-    showPreferences: false
-  };
+    showPreferences: false,
+  });
 
-  componentDidMount() {
+  useEffect(() => {
     ipcRenderer.on("update-shortcut-success", (_, { shortcut }) => {
-      this.setState({ shortcut });
+      setState((state) => ({ ...state, shortcut }));
     });
+
     ipcRenderer.on("update-shortcut-failure", () => {
-      this.setState(prevState => {
+      setState((prevState) => {
         setTimeout(() => {
-          this.setState({ shortcut: prevState.shortcut });
+          setState({ ...prevState, shortcut: prevState.shortcut });
         }, 3000);
-        return { shortcut: "Key combination not allowed!" };
+        return { ...prevState, shortcut: "Key combination not allowed!" };
       });
     });
-  }
 
-  componentWillUnmount() {
-    ipcRenderer.removeAllListeners("update-shortcut-success");
-    ipcRenderer.removeAllListeners("update-shortcut-failure");
-  }
+    return () => {
+      ipcRenderer.removeAllListeners("update-shortcut-success");
+      ipcRenderer.removeAllListeners("update-shortcut-failure");
+    };
+  });
 
-  updateDirectoryPath = directoryPath => {
+  const updateDirectoryPath = (directoryPath) => {
     // TODO: there is a potential discrepancy between react component state and store state
     store.set("directoryPath", directoryPath);
-    this.setState({ directoryPath });
+    setState((state) => ({ ...state, directoryPath }));
   };
 
-  updateShortcut = shortcut => {
+  const updateShortcut = (shortcut) => {
     // TODO: This should probably be update to happen synchronously somehow
     ipcRenderer.send("update-shortcut", { shortcut });
   };
 
-  updateFontSize = fontSize => {
+  const updateFontSize = (fontSize) => {
     // TODO: there is a potential discrepancy between react component state and store state
     store.set("fontSize", fontSize);
-    this.setState({ fontSize });
+    setState((state) => ({ ...state, fontSize }));
   };
 
-  openPreferences = () => {
-    this.setState({ showPreferences: true });
+  const openPreferences = () => {
+    setState((state) => ({ ...state, showPreferences: true }));
     ipcRenderer.send("preferences-open", true);
   };
 
-  closePreferences = () => {
-    this.setState({ showPreferences: false });
+  const closePreferences = () => {
+    setState((state) => ({ ...state, showPreferences: false }));
     ipcRenderer.send("preferences-closed", false);
   };
 
-  render() {
-    const { directoryPath, shortcut, fontSize, showPreferences } = this.state;
+  const { directoryPath, shortcut, fontSize, showPreferences } = state;
 
-    if (showPreferences) {
-      return (
-        <ThemeProvider theme={theme}>
-          <Preferences
-            directoryPath={directoryPath}
-            shortcut={shortcut}
-            fontSize={fontSize}
-            closePreferences={this.closePreferences}
-            updateDirectoryPath={this.updateDirectoryPath}
-            updateShortcut={this.updateShortcut}
-            updateFontSize={this.updateFontSize}
-          />
-        </ThemeProvider>
-      );
-    }
-
-    if (window.location.search.substring().slice(1) === "editor") {
-      return <Editor directoryPath={directoryPath} fontSize={fontSize} />;
-    }
-
+  if (showPreferences) {
     return (
       <ThemeProvider theme={theme}>
-        <Main
+        <Preferences
           directoryPath={directoryPath}
           shortcut={shortcut}
-          openPreferences={this.openPreferences}
+          fontSize={fontSize}
+          closePreferences={closePreferences}
+          updateDirectoryPath={updateDirectoryPath}
+          updateShortcut={updateShortcut}
+          updateFontSize={updateFontSize}
         />
       </ThemeProvider>
     );
   }
+
+  if (window.location.search.substring().slice(1) === "editor") {
+    return <Editor directoryPath={directoryPath} fontSize={fontSize} />;
+  }
+
+  return (
+    <ThemeProvider theme={theme}>
+      <Main
+        directoryPath={directoryPath}
+        shortcut={shortcut}
+        openPreferences={openPreferences}
+      />
+    </ThemeProvider>
+  );
 }
 
 ReactDOM.render(<App />, document.getElementById("app"));

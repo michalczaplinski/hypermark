@@ -5,5 +5,3 @@ export const focusStyles = ({ theme }) => css`
   background-color: ${theme.focusColor};
   outline: none;
 `;
-
-export const noop = () => {};

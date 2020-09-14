@@ -1,7 +1,6 @@
 import React, { Fragment } from "react";
 import styled from "@emotion/styled";
-import { remote } from "electron"; // eslint-disable-line
-
+import { remote } from "electron";
 import { is } from "electron-util";
 
 import { makeArray } from "../../util";
@@ -81,7 +80,7 @@ const DisabledInput = styled.div`
 
 function mapKeys(codes) {
   return codes
-    .map(word => {
+    .map((word) => {
       if (word === "Meta") {
         if (is.macos) {
           return "⌘";
@@ -103,7 +102,7 @@ function mapKeys(codes) {
 
 class Preferences extends React.Component {
   state = {
-    recordingKeys: false
+    recordingKeys: false,
   };
 
   render() {
@@ -114,7 +113,7 @@ class Preferences extends React.Component {
       shortcut,
       updateShortcut,
       updateFontSize,
-      updateDirectoryPath
+      updateDirectoryPath,
     } = this.props;
 
     const { recordingKeys } = this.state;
@@ -137,9 +136,9 @@ class Preferences extends React.Component {
                 {
                   title: "Choose directory",
                   defaultPath: directoryPath,
-                  properties: ["openDirectory"]
+                  properties: ["openDirectory"],
                 },
-                path => updateDirectoryPath(path[0])
+                (path) => updateDirectoryPath(path[0])
               );
             }}
           >
@@ -147,12 +146,12 @@ class Preferences extends React.Component {
           </button>
           <Heading>Font size</Heading>
           <select
-            onChange={e => {
+            onChange={(e) => {
               updateFontSize(e.target.value);
             }}
             value={fontSize}
           >
-            {makeArray(11, 22).map(value => (
+            {makeArray(11, 22).map((value) => (
               <option key={value} value={value}>
                 {value}
               </option>

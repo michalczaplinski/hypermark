@@ -128,6 +128,7 @@ class Note extends Component {
       deleteNote,
       openNote,
       children,
+      innerRef,
       ...props
     } = this.props;
     const { isBeingRenamed, isHovered } = this.state;
@@ -166,6 +167,7 @@ class Note extends Component {
               deleteNote(noteName);
             }
           }}
+          ref={innerRef}
           {...props}
         >
           {isBeingRenamed ? (

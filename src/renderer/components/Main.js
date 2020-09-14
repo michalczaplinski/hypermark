@@ -1,7 +1,7 @@
 import React, { Component } from "react";
-import styled from "styled-components";
-import { ipcRenderer,  remote } from "electron"; //eslint-disable-line
-import { orderBy } from "lodash";
+import styled from "@emotion/styled";
+import { ipcRenderer, remote } from "electron";
+import orderBy from "lodash.orderby";
 import Mousetrap from "mousetrap";
 import "mousetrap-global-bind";
 import path from "path";
@@ -138,7 +138,7 @@ class Main extends Component {
       undoVisible: false,
       currentFocusedNoteIndex: 0,
       currentSearchNotes: [],
-      searchValue: ""
+      searchValue: "",
     };
     this.input = React.createRef();
     this.noteRefs = [];
@@ -151,6 +151,7 @@ class Main extends Component {
     Mousetrap.bindGlobal(["command+z"], () => {
       undoStack.undo();
     });
+
     Mousetrap.bind("command+l", () => {
       this.input.focus();
     });
@@ -158,7 +159,7 @@ class Main extends Component {
     Mousetrap.bindGlobal(["command+j", "down"], () => {
       const {
         currentFocusedNoteIndex: i,
-        currentSearchNotes: notes
+        currentSearchNotes: notes,
       } = this.state;
 
       const noteToFocus = this.noteRefs[Math.min(notes.length - 1, i + 1)];
@@ -193,15 +194,15 @@ class Main extends Component {
     try {
       const files = await asyncReaddir(this.props.directoryPath);
       const promiseOfFiles = files
-        .filter(noteFileName => path.extname(noteFileName) === ".md")
-        .map(noteFileName =>
+        .filter((noteFileName) => path.extname(noteFileName) === ".md")
+        .map((noteFileName) =>
           asyncStat(path.join(this.props.directoryPath, noteFileName))
-            .then(stats => ({
+            .then((stats) => ({
               noteName: noteFileName.replace(/\.md$/, ""),
               noteFileName,
-              lastModified: stats.mtimeMs
+              lastModified: stats.mtimeMs,
             }))
-            .catch(err => {
+            .catch((err) => {
               throw err;
             })
         );
@@ -216,13 +217,13 @@ class Main extends Component {
     }
   };
 
-  searchWrapper = async searchValue => {
+  searchWrapper = async (searchValue) => {
     const { allNotes } = this.state;
     this.setState({ searchValue });
     const currentSearchNotes = await this.search(searchValue, allNotes);
     this.setState({ currentSearchNotes });
     ipcRenderer.send("search-input-change", {
-      searchListLength: currentSearchNotes.length
+      searchListLength: currentSearchNotes.length,
     });
   };
 
@@ -234,7 +235,7 @@ class Main extends Component {
           searchValue.trim().toLowerCase(),
           noteFileName
         )),
-        ...rest
+        ...rest,
       })
     );
 
@@ -261,7 +262,7 @@ class Main extends Component {
         return {
           hasValue: true,
           indexOfValueInTitle,
-          indexOfValue: null
+          indexOfValue: null,
         };
       }
 
@@ -269,7 +270,7 @@ class Main extends Component {
         return {
           hasValue: true,
           indexOfValueInTitle: null,
-          indexOfValue
+          indexOfValue,
         };
       }
     } catch (error) {
@@ -278,7 +279,7 @@ class Main extends Component {
     return {
       hasValue: false,
       indexOfValueInTitle: null,
-      indexOfValue: null
+      indexOfValue: null,
     };
   };
 
@@ -300,7 +301,7 @@ class Main extends Component {
       .then(() => {
         this.scanForNotes();
       })
-      .catch(err => {
+      .catch((err) => {
         if (err) {
           if (err.code === "EEXIST") {
             console.error(`"${noteName}" already exists`);
@@ -311,7 +312,7 @@ class Main extends Component {
       });
   };
 
-  deleteNote = async noteName => {
+  deleteNote = async (noteName) => {
     const noteFileName = `${noteName}.md`;
     const location = path.join(this.props.directoryPath, noteFileName);
     const noteContents = await asyncReadFile(location, "utf8");
@@ -327,19 +328,19 @@ class Main extends Component {
       .then(() => {
         setTimeout(() => this.setState({ undoVisible: false }), 9000);
       })
-      .catch(err => {
+      .catch((err) => {
         console.warn(err);
       });
   };
 
-  openNote = async noteName => {
+  openNote = async (noteName) => {
     const noteFileName = `${noteName}.md`;
     const location = path.join(this.props.directoryPath, noteFileName);
     const noteContents = await asyncReadFile(location, "utf8");
     ipcRenderer.send("open-editor", {
       noteContents,
       noteFileName,
-      noteTitle: noteName
+      noteTitle: noteName,
     });
     this.mainWindow.hide();
     this.clearSearch();
@@ -361,14 +362,14 @@ class Main extends Component {
           ipcRenderer.send("update-editor-title", {
             title: oldName,
             newTitle: newName,
-            newFileName: `${newName}.md`
+            newFileName: `${newName}.md`,
           });
           this.scanForNotes();
         })
         .then(() => {
           setTimeout(() => this.setState({ undoVisible: false }), 5000);
         })
-        .catch(e => {
+        .catch((e) => {
           console.warn(e);
         });
     }
@@ -378,7 +379,7 @@ class Main extends Component {
     this.setState({ searchValue: "" });
     this.mainWindow.hide();
     ipcRenderer.send("search-input-change", {
-      searchListLength: 6
+      searchListLength: 6,
     });
   }
 
@@ -390,7 +391,7 @@ class Main extends Component {
       searchValue,
       searchFocused,
       currentFocusedNoteIndex,
-      undoVisible
+      undoVisible,
     } = this.state;
 
     const notes = orderBy(
@@ -406,7 +407,7 @@ class Main extends Component {
             {undoVisible && (
               <UndoContainer>
                 <UndoButton
-                  onClick={e => {
+                  onClick={(e) => {
                     undoStack.undo();
                     e.preventDefault();
                     this.setState({ undoVisible: false });
@@ -419,14 +420,18 @@ class Main extends Component {
             )}
 
             {searchValue === "" && (
-              <OpenPreferences onClick={openPreferences}>⚙️</OpenPreferences> //eslint-disable-line
+              <OpenPreferences onClick={openPreferences}>
+                <span role="img" aria-label="settings">
+                  ⚙️
+                </span>
+              </OpenPreferences>
             )}
 
             <Search
               placeholder="Type to search or create a new note..."
               autoFocus
               type="text"
-              innerRef={el => {
+              ref={(el) => {
                 this.noteRefs[0] = el;
                 this.input = el;
               }}
@@ -435,11 +440,11 @@ class Main extends Component {
               onFocus={() => {
                 this.setState({
                   currentFocusedNoteIndex: 0,
-                  searchFocused: true
+                  searchFocused: true,
                 });
               }}
-              onChange={e => this.searchWrapper(e.target.value)}
-              onKeyDown={e => {
+              onChange={(e) => this.searchWrapper(e.target.value)}
+              onKeyDown={(e) => {
                 if (e.key === "Tab") {
                   this.setState({ currentFocusedNoteIndex: 1 });
                 }
@@ -485,7 +490,8 @@ class Main extends Component {
               openNote={this.openNote}
               focus={searchFocused}
               focused={currentFocusedNoteIndex === index}
-              innerRef={el => {
+              // This is ref is passed down to `<StyledNote/>`
+              innerRef={(el) => {
                 if (index !== 0) {
                   this.noteRefs[index] = el;
                 }

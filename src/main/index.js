@@ -1,11 +1,4 @@
-import {
-  app,
-  BrowserWindow,
-  ipcMain,
-  globalShortcut,
-  ipcRenderer,
-  shell,
-} from "electron"; //eslint-disable-line
+import { app, BrowserWindow, ipcMain, globalShortcut, shell } from "electron";
 import { format as formatUrl } from "url";
 import Store from "electron-store";
 import path from "path";
@@ -152,10 +145,10 @@ function createEditorWindow(title) {
   let height = 480;
 
   if (editorWindow) {
-    x = editorWindow.x; //eslint-disable-line
-    y = editorWindow.y; //eslint-disable-line
-    width = editorWindow.width; //eslint-disable-line
-    height = editorWindow.height; //eslint-disable-line
+    x = editorWindow.x;
+    y = editorWindow.y;
+    width = editorWindow.width;
+    height = editorWindow.height;
   } else {
     openedWindows.push({ x, y, width, height, title });
     store.set("openedWindows", openedWindows);
@@ -393,7 +386,7 @@ ipcMain.on("update-shortcut", (event, { shortcut }) => {
 });
 
 ipcMain.on("preferences-open", () => {
-  const [_, height] = state.mainWindow.getContentSize(); // eslint-disable-line
+  const [, height] = state.mainWindow.getContentSize();
 
   if (height < 375) {
     state.mainWindow.setContentSize(420, 375, true);
