@@ -73,8 +73,5 @@
     "main": {
       "webpackConfig": "webpack.main.config.js"
     }
-  },
-  "resolutions": {
-    "webpack-sources": "1.0.1"
   }
 }
